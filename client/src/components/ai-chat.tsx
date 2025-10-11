@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, X } from "lucide-react";
+import { Send, Bot, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -130,25 +130,14 @@ export default function AIChat({ isOpen, onClose, initialMessage, serviceId }: A
       <DialogContent className="max-w-md h-[600px] flex flex-col p-0" data-testid="dialog-ai-chat">
         {/* Header */}
         <DialogHeader className="bg-primary text-primary-foreground p-4 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center mr-3">
-                <Bot className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-medium">Beauty Assistant</DialogTitle>
-                <p className="text-xs opacity-80">Online now</p>
-              </div>
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center mr-3">
+              <Bot className="h-4 w-4 text-primary-foreground" />
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose}
-              className="text-primary-foreground hover:bg-primary-foreground/10"
-              data-testid="button-close-chat"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div>
+              <DialogTitle className="text-base font-medium">Beauty Assistant</DialogTitle>
+              <p className="text-xs opacity-80">Online now</p>
+            </div>
           </div>
         </DialogHeader>
 

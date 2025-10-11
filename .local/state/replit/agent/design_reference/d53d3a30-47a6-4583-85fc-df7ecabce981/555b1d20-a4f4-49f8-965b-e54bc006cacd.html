@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goodness Glamour Ladies & Kids Salon - Premium Doorstep Beauty Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    border: "var(--border)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    serif: ["Playfair Display", "serif"],
+                    sans: ["Inter", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(350 20% 98%);
+            --foreground: hsl(240 10% 18%);
+            --card: hsl(350 15% 96%);
+            --card-foreground: hsl(240 10% 18%);
+            --primary: hsl(340 30% 75%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(345 25% 92%);
+            --secondary-foreground: hsl(240 10% 18%);
+            --muted: hsl(345 15% 90%);
+            --muted-foreground: hsl(240 5% 45%);
+            --accent: hsl(42 87% 55%);
+            --accent-foreground: hsl(0 0% 100%);
+            --border: hsl(340 15% 85%);
+            --ring: hsl(340 30% 75%);
+            --radius: 0.75rem;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-serif font-semibold text-primary">Goodness Glamour</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#services" class="text-foreground hover:text-primary transition-colors">Services</a>
+                    <a href="#how-it-works" class="text-foreground hover:text-primary transition-colors">How It Works</a>
+                    <a href="#contact" class="text-foreground hover:text-primary transition-colors">Contact</a>
+                    <button class="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                        Book Now
+                    </button>
+                </div>
+                <button class="md:hidden">
+                    <i class="fas fa-bars text-foreground"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-16 bg-gradient-to-br from-secondary to-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-4xl lg:text-6xl font-serif font-bold text-foreground mb-6">
+                        Premium <span class="text-primary">Doorstep</span> Beauty Services
+                    </h1>
+                    <p class="text-lg text-muted-foreground mb-8 leading-relaxed">
+                        Professional salon services for women and kids, delivered to your home. 
+                        Experience luxury beauty treatments in the comfort of your own space.
+                    </p>
+                    
+                    <!-- QR Scan Section -->
+                    <div class="bg-card p-6 rounded-xl border border-border mb-8">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="w-24 h-24 bg-white border-2 border-primary rounded-lg flex items-center justify-center">
+                                <i class="fas fa-qrcode text-primary text-3xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mb-2">Scan QR & Speak to AI Agent</h3>
+                        <p class="text-muted-foreground text-sm mb-4">
+                            Scan our QR code for instant AI assistance and quick booking
+                        </p>
+                        <button class="w-full bg-accent text-accent-foreground py-3 px-6 rounded-lg font-medium hover:bg-accent/90 transition-colors">
+                            <i class="fas fa-camera mr-2"></i>
+                            Open Camera Scanner
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button class="bg-primary text-primary-foreground px-8 py-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Book Appointment
+                        </button>
+                        <button class="border-2 border-primary text-primary px-8 py-4 rounded-lg font-medium hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            Call: 9036626642
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <!-- Hero image showcasing salon services -->
+                    <!-- A professional woman getting her hair styled in an elegant salon setting -->
+                    <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                         alt="Professional hair styling service" 
+                         class="rounded-xl shadow-2xl w-full h-auto">
+                    
+                    <!-- Floating service badges -->
+                    <div class="absolute -bottom-6 -left-6 bg-accent text-accent-foreground p-4 rounded-lg shadow-lg">
+                        <i class="fas fa-home text-2xl mb-2"></i>
+                        <p class="text-sm font-medium">Doorstep Service</p>
+                    </div>
+                    <div class="absolute -top-6 -right-6 bg-primary text-primary-foreground p-4 rounded-lg shadow-lg">
+                        <i class="fas fa-star text-2xl mb-2"></i>
+                        <p class="text-sm font-medium">5★ Rated</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+                    Our Premium Services
+                </h2>
+                <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Professional beauty treatments for women and children, 
+                    delivered with care and expertise to your doorstep.
+                </p>
+            </div>
+
+            <!-- Women Services -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+                    <i class="fas fa-female text-primary mr-2"></i>
+                    Women's Hair Services
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Service Card 1 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Professional haircut and styling for women -->
+                        <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Women's haircut and styling" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Cut & Styling</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Professional haircuts, blowdry, and styling for all hair types.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹500 - ₹1500</span>
+                                <span class="text-xs text-muted-foreground">60-90 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 2 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair coloring and highlights for women -->
+                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair coloring and highlights" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Coloring</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Professional hair coloring, highlights, balayage, and ombre treatments.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹1500 - ₹4000</span>
+                                <span class="text-xs text-muted-foreground">120-180 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 3 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair spa and treatment for women -->
+                        <img src="https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair spa and treatment" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Spa & Treatment</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Deep conditioning, keratin treatment, and rejuvenating hair spa.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹800 - ₹2500</span>
+                                <span class="text-xs text-muted-foreground">90-120 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 4 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair styling for special occasions -->
+                        <img src="https://pixabay.com/get/g211633fdb126d5957285f71ee8d5e71f7ff262d14e31ca3ecfa5fd63b3c848cc6ff26e7a26df557f49315c4e707f61a6156ffd53d23e7504fe93c4758cd99499_1280.jpg" 
+                             alt="Bridal and party hair styling" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Bridal & Party Styling</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Elegant updos, braids, and special occasion hair styling.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹1000 - ₹3000</span>
+                                <span class="text-xs text-muted-foreground">90-150 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 5 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Professional blow dry service -->
+                        <img src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Professional blow dry styling" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Professional Blowdry</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Smooth, voluminous blowdry with heat protection and styling.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹300 - ₹800</span>
+                                <span class="text-xs text-muted-foreground">45-60 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Card 6 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair care consultation service -->
+                        <img src="https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair consultation and analysis" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Consultation</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Expert hair analysis and personalized care recommendations.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹200 - ₹500</span>
+                                <span class="text-xs text-muted-foreground">30-45 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kids Services -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+                    <i class="fas fa-child text-primary mr-2"></i>
+                    Kids Hair Services
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Kids Service Card 1 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Kids haircut and styling -->
+                        <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Kids haircut and styling" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Kids Haircuts</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Fun and comfortable haircuts for children of all ages.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹200 - ₹600</span>
+                                <span class="text-xs text-muted-foreground">30-45 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kids Service Card 2 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Kids hair styling for parties -->
+                        <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Kids party hair styling" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Kids Party Styling</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Special occasion hairstyles with fun braids and accessories.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹300 - ₹800</span>
+                                <span class="text-xs text-muted-foreground">45-60 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kids Service Card 3 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Kids hair wash and treatment -->
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Kids hair wash and care" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Kids Hair Wash</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Gentle hair washing and conditioning for children.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹150 - ₹400</span>
+                                <span class="text-xs text-muted-foreground">20-30 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kids Service Card 4 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Kids hair braiding service -->
+                        <img src="https://pixabay.com/get/ge54bb55e504cabd40fbd89497edbcb19592f17c5e823a2af2e84f894e9d044c74e2aeef150e952e8c2b0c90877bfd3cf5037ce5e0be998f1a6c374f9f454a73a_1280.jpg" 
+                             alt="Kids hair braiding" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Fun Braiding</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Creative braids and ponytails for school and play.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹200 - ₹500</span>
+                                <span class="text-xs text-muted-foreground">30-45 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Ask AI About This Service
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Beauty Services -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+                    <i class="fas fa-home text-primary mr-2"></i>
+                    Complete Home Beauty Experience
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Home Service Card 1 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Professional home beauty setup -->
+                        <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Home beauty service setup" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Full Setup Service</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Complete professional setup at your home with all equipment.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">Free Setup</span>
+                                <span class="text-xs text-muted-foreground">15 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Home Service Card 2 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Mobile beauty station -->
+                        <img src="https://images.unsplash.com/photo-1552693673-1bf958298935?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Mobile beauty station" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Mobile Salon</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Portable salon experience with premium products and tools.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">Premium Setup</span>
+                                <span class="text-xs text-muted-foreground">30 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Home Service Card 3 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Safety and hygiene protocols -->
+                        <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Safety and hygiene measures" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Safety First</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Strict hygiene protocols and sanitized equipment for your safety.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">100% Safe</span>
+                                <span class="text-xs text-muted-foreground">Always</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Home Service Card 4 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Professional consultation at home -->
+                        <img src="https://pixabay.com/get/g0d41dc5cbf12b8df2e32f85da3652e9c9eca60240c134db81dff1dc4e1361cb9beba0abc71fe08768b31a8607269c5e06a77df7dbf80c69ef7328bf2c77f08b2_1280.jpg" 
+                             alt="Home consultation service" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Expert Consultation</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Professional advice and recommendations in your comfort zone.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹100 - ₹300</span>
+                                <span class="text-xs text-muted-foreground">20-30 mins</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hair Care Products -->
+            <div>
+                <h3 class="text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+                    <i class="fas fa-shopping-bag text-primary mr-2"></i>
+                    Premium Hair Care Products
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Product Card 1 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair care shampoo and conditioner products -->
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Premium shampoo and conditioner" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Shampoo & Conditioner</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Professional-grade hair cleansing and conditioning products.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹500 - ₹1500</span>
+                                <span class="text-xs text-muted-foreground">Available</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                View Products
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 2 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair treatment oils and serums -->
+                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair oils and treatment serums" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Oils & Serums</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Nourishing oils and treatment serums for healthy hair.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹300 - ₹1200</span>
+                                <span class="text-xs text-muted-foreground">Available</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                View Products
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 3 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair masks and treatments -->
+                        <img src="https://images.unsplash.com/photo-1583947215259-38e31be8751f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair masks and deep conditioning treatments" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Hair Masks</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Deep conditioning masks for repair and nourishment.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹400 - ₹1800</span>
+                                <span class="text-xs text-muted-foreground">Available</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                View Products
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 4 -->
+                    <div class="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+                        <!-- Hair styling products and tools -->
+                        <img src="https://images.unsplash.com/photo-1522338242992-e1a54906a8da?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" 
+                             alt="Hair styling products and accessories" 
+                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="p-6">
+                            <h4 class="text-xl font-serif font-semibold mb-2">Styling Products</h4>
+                            <p class="text-muted-foreground text-sm mb-4">
+                                Professional styling gels, mousses, and finishing sprays.
+                            </p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-accent font-semibold">₹250 - ₹1000</span>
+                                <span class="text-xs text-muted-foreground">Available</span>
+                            </div>
+                            <button class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                View Products
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-16 bg-secondary/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+                    How It Works
+                </h2>
+                <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Simple steps to book your premium doorstep beauty service
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-qrcode text-primary-foreground text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-semibold mb-4">1. Scan QR Code</h3>
+                    <p class="text-muted-foreground">
+                        Scan our QR code from flyers, products, or salon materials to instantly connect with our AI assistant.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-robot text-accent-foreground text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-semibold mb-4">2. Chat with AI</h3>
+                    <p class="text-muted-foreground">
+                        Our AI assistant will understand your needs and recommend the perfect services for you and your family.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-calendar-check text-primary-foreground text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-semibold mb-4">3. Book Appointment</h3>
+                    <p class="text-muted-foreground">
+                        Choose your preferred date, time, and location. Our system will confirm your booking instantly.
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-home text-accent-foreground text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-semibold mb-4">4. Enjoy Service</h3>
+                    <p class="text-muted-foreground">
+                        Our professional stylist arrives at your doorstep with all equipment for a premium salon experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Assistant Showcase -->
+    <section class="py-16 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-6">
+                        Meet Your Personal Beauty Assistant
+                    </h2>
+                    <p class="text-lg text-muted-foreground mb-8 leading-relaxed">
+                        Our AI-powered assistant is available 24/7 to help you choose the perfect services, 
+                        answer questions, and book appointments. Experience personalized beauty consultations 
+                        through voice or chat.
+                    </p>
+                    
+                    <!-- AI Features -->
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-check text-primary-foreground text-sm"></i>
+                            </div>
+                            <span class="text-foreground">Instant service recommendations</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-check text-primary-foreground text-sm"></i>
+                            </div>
+                            <span class="text-foreground">Voice and chat support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-check text-primary-foreground text-sm"></i>
+                            </div>
+                            <span class="text-foreground">Real-time appointment booking</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-check text-primary-foreground text-sm"></i>
+                            </div>
+                            <span class="text-foreground">Personalized beauty advice</span>
+                        </div>
+                    </div>
+
+                    <button class="bg-accent text-accent-foreground px-8 py-4 rounded-lg font-medium hover:bg-accent/90 transition-colors flex items-center">
+                        <i class="fas fa-comments mr-2"></i>
+                        Try AI Assistant
+                    </button>
+                </div>
+
+                <!-- AI Chat Interface Demo -->
+                <div class="bg-card rounded-xl border border-border overflow-hidden shadow-lg">
+                    <div class="bg-primary text-primary-foreground p-4 flex items-center">
+                        <div class="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-robot text-primary-foreground text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Beauty Assistant</h4>
+                            <p class="text-xs opacity-80">Online now</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 h-80 overflow-y-auto space-y-4">
+                        <!-- AI Message -->
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                            </div>
+                            <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                                <p class="text-sm">Hello! Welcome to Goodness Glamour. Which service are you interested in today?</p>
+                            </div>
+                        </div>
+
+                        <!-- User Message -->
+                        <div class="flex items-start justify-end">
+                            <div class="bg-primary rounded-lg p-3 max-w-xs text-primary-foreground">
+                                <p class="text-sm">I want a hair treatment and spa for myself and a haircut for my daughter.</p>
+                            </div>
+                        </div>
+
+                        <!-- AI Response -->
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                            </div>
+                            <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                                <p class="text-sm">Perfect! For hair treatment, we have keratin treatment (₹2000), hair spa (₹1200), and scalp detox (₹800). For kids haircut, we offer fun cuts starting from ₹300. Which interests you?</p>
+                            </div>
+                        </div>
+
+                        <!-- User Message -->
+                        <div class="flex items-start justify-end">
+                            <div class="bg-primary rounded-lg p-3 max-w-xs text-primary-foreground">
+                                <p class="text-sm">Book keratin treatment and kids haircut for this Saturday.</p>
+                            </div>
+                        </div>
+
+                        <!-- AI Response -->
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                            </div>
+                            <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                                <p class="text-sm">Excellent choice! I can book both services for Saturday. Could you please provide your address and preferred time slot?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t border-border">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" placeholder="Type your message..." class="flex-1 p-2 border border-border rounded-lg text-sm" />
+                            <button class="bg-primary text-primary-foreground p-2 rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fas fa-paper-plane text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-secondary/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+                    What Our Clients Say
+                </h2>
+                <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Read testimonials from satisfied customers who love our doorstep beauty services.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-accent">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted-foreground mb-6 italic">
+                        "Amazing service! The AI assistant helped me choose the perfect treatment. 
+                        The stylist was professional and my hair looks fantastic. Love the convenience!"
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                            <span class="text-primary-foreground font-semibold">P</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Priya Sharma</h4>
+                            <p class="text-sm text-muted-foreground">Regular Customer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-accent">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted-foreground mb-6 italic">
+                        "Perfect for busy moms! My daughter loved her haircut and I got a relaxing spa treatment. 
+                        The QR code booking was so easy to use."
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                            <span class="text-primary-foreground font-semibold">A</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Anita Desai</h4>
+                            <p class="text-sm text-muted-foreground">Mother of Two</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-accent">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-muted-foreground mb-6 italic">
+                        "The AI voice assistant understands exactly what I need. 
+                        Professional service, affordable prices, and great results every time!"
+                    </p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                            <span class="text-primary-foreground font-semibold">R</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Rashmi Patel</h4>
+                            <p class="text-sm text-muted-foreground">Working Professional</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+                    Get in Touch
+                </h2>
+                <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    Ready to experience premium doorstep beauty services? Contact us today!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Information -->
+                <div>
+                    <div class="space-y-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-phone text-primary-foreground"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Phone</h4>
+                                <p class="text-muted-foreground">9036626642</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-clock text-accent-foreground"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Service Hours</h4>
+                                <p class="text-muted-foreground">Mon - Sun: 9:00 AM - 8:00 PM</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-map-marker-alt text-primary-foreground"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Service Area</h4>
+                                <p class="text-muted-foreground">We serve across the city with doorstep services</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-robot text-accent-foreground"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">AI Assistant</h4>
+                                <p class="text-muted-foreground">Available 24/7 for instant booking and queries</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-8 space-y-4">
+                        <button class="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Book Appointment Now
+                        </button>
+                        <button class="w-full border-2 border-accent text-accent py-3 px-6 rounded-lg font-medium hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-center">
+                            <i class="fas fa-comments mr-2"></i>
+                            Chat with AI Assistant
+                        </button>
+                        <button class="w-full border-2 border-primary text-primary py-3 px-6 rounded-lg font-medium hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            Call: 9036626642
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="bg-card rounded-xl border border-border p-8">
+                    <h3 class="text-2xl font-serif font-semibold mb-6">Send us a Message</h3>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Name</label>
+                                <input type="text" class="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Your name" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Phone</label>
+                                <input type="tel" class="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Your phone number" />
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Service Interest</label>
+                            <select class="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option>Select a service</option>
+                                <option>Women's Hair Services</option>
+                                <option>Kids Hair Services</option>
+                                <option>Hair Spa & Treatment</option>
+                                <option>Bridal & Party Styling</option>
+                                <option>Hair Coloring</option>
+                                <option>Consultation</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Address</label>
+                            <textarea class="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent h-24" placeholder="Your full address for doorstep service"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Message</label>
+                            <textarea class="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent h-24" placeholder="Tell us about your requirements"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-accent text-accent-foreground py-3 px-6 rounded-lg font-medium hover:bg-accent/90 transition-colors">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-foreground text-background py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <h3 class="text-xl font-serif font-semibold mb-4">Goodness Glamour</h3>
+                    <p class="text-background/80 mb-4">
+                        Premium doorstep beauty services for women and kids. 
+                        Experience luxury salon treatments in the comfort of your home.
+                    </p>
+                    <div class="flex space-x-4">
+                        <i class="fab fa-facebook text-background/60 hover:text-background cursor-pointer"></i>
+                        <i class="fab fa-instagram text-background/60 hover:text-background cursor-pointer"></i>
+                        <i class="fab fa-whatsapp text-background/60 hover:text-background cursor-pointer"></i>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h4 class="font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-background/80">
+                        <li>Hair Cut & Styling</li>
+                        <li>Hair Coloring</li>
+                        <li>Hair Spa & Treatment</li>
+                        <li>Bridal Styling</li>
+                        <li>Kids Hair Services</li>
+                        <li>Home Consultation</li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-background/80">
+                        <li><a href="#services" class="hover:text-background">Our Services</a></li>
+                        <li><a href="#how-it-works" class="hover:text-background">How It Works</a></li>
+                        <li><a href="#contact" class="hover:text-background">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-background">Book Now</a></li>
+                        <li><a href="#" class="hover:text-background">AI Assistant</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-background/80">
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            9036626642
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-clock mr-2"></i>
+                            9 AM - 8 PM Daily
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Citywide Service
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-background/20 mt-8 pt-8 text-center text-background/60">
+                <p>&copy; 2024 Goodness Glamour Ladies & Kids Salon. All rights reserved.</p>
+                <p class="mt-2">Powered by AI-driven booking technology</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating AI Chat Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button class="bg-accent text-accent-foreground w-16 h-16 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <!-- QR Scanner Modal (Hidden by default) -->
+    <div id="qr-scanner-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="bg-card rounded-xl border border-border p-8 m-4 max-w-md w-full">
+            <div class="text-center">
+                <h3 class="text-2xl font-serif font-semibold mb-4">QR Code Scanner</h3>
+                <p class="text-muted-foreground mb-6">
+                    Position the QR code within the camera view to start AI assistant
+                </p>
+                
+                <!-- Camera view placeholder -->
+                <div class="w-full h-64 bg-muted rounded-lg flex items-center justify-center mb-6">
+                    <div class="text-center">
+                        <i class="fas fa-camera text-4xl text-muted-foreground mb-2"></i>
+                        <p class="text-muted-foreground">Camera View</p>
+                        <!-- TODO: Implement camera access and QR scanning using jsQR or QuaggaJS -->
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button class="flex-1 bg-primary text-primary-foreground py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                        Start Scanning
+                    </button>
+                    <button class="flex-1 border-2 border-border text-foreground py-3 px-6 rounded-lg font-medium hover:bg-muted transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple JavaScript for basic interactions
+        (function() {
+            // Mobile menu toggle (placeholder)
+            const mobileMenuButton = document.querySelector('.md\\:hidden button');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    // TODO: Implement mobile menu toggle
+                    console.log('Mobile menu clicked');
+                });
+            }
+
+            // Floating AI chat button
+            const aiChatButton = document.querySelector('.fixed.bottom-6.right-6 button');
+            if (aiChatButton) {
+                aiChatButton.addEventListener('click', function() {
+                    // TODO: Open AI chat interface
+                    alert('AI Assistant coming soon! For now, please call 9036626642');
+                });
+            }
+
+            // QR Scanner button
+            const qrScannerButtons = document.querySelectorAll('button:contains("Camera Scanner")');
+            // Note: This is a simplified selector, in practice you'd use a more specific selector
+            
+            // Service "Ask AI" buttons
+            const askAIButtons = document.querySelectorAll('button:contains("Ask AI About This Service")');
+            askAIButtons.forEach(button => {
+                if (button && button.textContent.includes('Ask AI About This Service')) {
+                    button.addEventListener('click', function() {
+                        // TODO: Open AI chat for specific service
+                        const serviceCard = button.closest('.bg-card');
+                        const serviceName = serviceCard ? serviceCard.querySelector('h4').textContent : 'this service';
+                        alert(`AI Assistant: I'd love to help you learn more about ${serviceName}! This feature will be available soon. Please call 9036626642 for immediate assistance.`);
+                    });
+                }
+            });
+
+            // Booking buttons
+            const bookingButtons = document.querySelectorAll('button:contains("Book"), button:contains("Appointment")');
+            bookingButtons.forEach(button => {
+                if (button && (button.textContent.includes('Book') || button.textContent.includes('Appointment'))) {
+                    button.addEventListener('click', function() {
+                        // TODO: Open booking flow
+                        alert('Booking system coming soon! Please call 9036626642 to book your appointment.');
+                    });
+                }
+            });
+
+            // Contact form submission
+            const contactForm = document.querySelector('form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // TODO: Implement form submission to backend
+                    alert('Thank you for your message! We will contact you soon. For immediate booking, please call 9036626642.');
+                });
+            }
+
+            // Smooth scrolling for navigation links
+            const navLinks = document.querySelectorAll('a[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Phone number click handler
+            const phoneLinks = document.querySelectorAll('button:contains("9036626642"), a:contains("9036626642")');
+            phoneLinks.forEach(link => {
+                if (link && link.textContent.includes('9036626642')) {
+                    link.addEventListener('click', function(e) {
+                        if (link.tagName === 'BUTTON') {
+                            e.preventDefault();
+                            window.location.href = 'tel:9036626642';
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

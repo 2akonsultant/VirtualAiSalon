@@ -1,4 +1,4 @@
-import { type Service, type Customer, type Booking, type AiConversation, type InsertService, type InsertCustomer, type InsertBooking, type InsertAiConversation } from "@shared/schema";
+import { type Service, type Customer, type Booking, type AiConversation, type ContactMessage, type InsertService, type InsertCustomer, type InsertBooking, type InsertAiConversation, type InsertContactMessage } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -24,6 +24,12 @@ export interface IStorage {
   getConversationBySession(sessionId: string): Promise<AiConversation | undefined>;
   createConversation(conversation: InsertAiConversation): Promise<AiConversation>;
   updateConversation(id: string, messages: any[]): Promise<AiConversation | undefined>;
+  
+  // Contact Messages
+  getContactMessages(): Promise<ContactMessage[]>;
+  getContactMessage(id: string): Promise<ContactMessage | undefined>;
+  createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
+  updateContactMessageStatus(id: string, emailSent: boolean, excelUpdated: boolean): Promise<ContactMessage | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -31,6 +37,7 @@ export class MemStorage implements IStorage {
   private customers: Map<string, Customer> = new Map();
   private bookings: Map<string, Booking> = new Map();
   private aiConversations: Map<string, AiConversation> = new Map();
+  private contactMessages: Map<string, ContactMessage> = new Map();
 
   constructor() {
     this.initializeServices();
@@ -249,6 +256,41 @@ export class MemStorage implements IStorage {
       conversation.messages = messages;
       this.aiConversations.set(id, conversation);
       return conversation;
+    }
+    return undefined;
+  }
+
+  // Contact Messages
+  async getContactMessages(): Promise<ContactMessage[]> {
+    return Array.from(this.contactMessages.values()).sort((a, b) => 
+      new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
+    );
+  }
+
+  async getContactMessage(id: string): Promise<ContactMessage | undefined> {
+    return this.contactMessages.get(id);
+  }
+
+  async createContactMessage(insertMessage: InsertContactMessage): Promise<ContactMessage> {
+    const id = randomUUID();
+    const contactMessage: ContactMessage = { 
+      ...insertMessage, 
+      id, 
+      emailSent: false,
+      excelUpdated: false,
+      createdAt: new Date() 
+    };
+    this.contactMessages.set(id, contactMessage);
+    return contactMessage;
+  }
+
+  async updateContactMessageStatus(id: string, emailSent: boolean, excelUpdated: boolean): Promise<ContactMessage | undefined> {
+    const message = this.contactMessages.get(id);
+    if (message) {
+      message.emailSent = emailSent;
+      message.excelUpdated = excelUpdated;
+      this.contactMessages.set(id, message);
+      return message;
     }
     return undefined;
   }

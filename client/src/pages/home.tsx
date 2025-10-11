@@ -1,25 +1,33 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Camera, Calendar, Phone, Star, Home as HomeIcon, ShoppingBag, CheckCircle, Bot, QrCode, Clock, MapPin } from "lucide-react";
+import { Calendar, Phone, Star, Home as HomeIcon, ShoppingBag, CheckCircle, Bot, QrCode, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import QRScanner from "@/components/qr-scanner";
 import AIChat from "@/components/ai-chat";
 import ServiceCard from "@/components/service-card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { Service } from "@shared/schema";
 
 export default function Home() {
   const [location] = useLocation();
-  const [showQRScanner, setShowQRScanner] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiInitialMessage, setAiInitialMessage] = useState("");
   const { toast } = useToast();
+
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    phone: "",
+    serviceInterest: "",
+    address: "",
+    message: "",
+  });
 
   // Check if this is an AI chat redirect
   useEffect(() => {
@@ -34,18 +42,49 @@ export default function Home() {
 
   const featuredServices = services.slice(0, 6);
 
-  const handleQRScan = (data: string) => {
-    try {
-      const qrData = JSON.parse(data);
-      setShowAIChat(true);
-      setAiInitialMessage("I scanned your QR code. What services can you help me with?");
-    } catch (error) {
+  // Contact form submission mutation
+  const contactMutation = useMutation({
+    mutationFn: async (formData: typeof contactForm) => {
+      const response = await apiRequest("POST", "/api/contact", formData);
+      return response.json();
+    },
+    onSuccess: () => {
       toast({
-        title: "Invalid QR Code",
-        description: "The QR code format is not recognized.",
+        title: "Message Sent!",
+        description: "Thank you! We'll contact you soon.",
+      });
+      // Reset form
+      setContactForm({
+        name: "",
+        phone: "",
+        serviceInterest: "",
+        address: "",
+        message: "",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
+    },
+  });
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!contactForm.name || !contactForm.phone || !contactForm.serviceInterest || !contactForm.address) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
     }
+    
+    contactMutation.mutate(contactForm);
   };
 
   const handleServiceAI = (service: Service) => {
@@ -74,25 +113,21 @@ export default function Home() {
                 delivered with care and expertise to your doorstep.
               </p>
               
-              {/* QR Scan Section */}
-              <Card className="p-6 mb-8 bg-card/80 backdrop-blur-sm" data-testid="qr-scan-section">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="w-24 h-24 bg-white border-2 border-primary rounded-lg flex items-center justify-center">
-                    <QrCode className="text-primary text-3xl h-12 w-12" />
+              {/* QR Code Section */}
+              <Card className="p-8 mb-8 bg-card/80 backdrop-blur-sm" data-testid="qr-scan-section">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="w-48 h-48 bg-white border-2 border-primary/20 rounded-2xl flex items-center justify-center shadow-xl p-4">
+                    <img 
+                      src="/qr-code.png" 
+                      alt="QR Code to visit Goodness Glamour website"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
-                <h3 className="text-xl font-serif font-semibold mb-2">Scan QR & Speak to AI Agent</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Scan our QR code from flyers or marketing materials for instant AI assistance and quick booking
+                <h3 className="text-xl font-serif font-semibold mb-3 text-center">Scan to Visit Our Website</h3>
+                <p className="text-muted-foreground text-sm text-center leading-relaxed">
+                  Scan this QR code with your phone camera to instantly open our website and explore all services
                 </p>
-                <Button 
-                  onClick={() => setShowQRScanner(true)}
-                  className="w-full btn-accent flex items-center justify-center"
-                  data-testid="button-open-camera-scanner"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Open Camera Scanner
-                </Button>
               </Card>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -124,11 +159,6 @@ export default function Home() {
                 className="rounded-xl shadow-2xl w-full h-auto"
                 data-testid="hero-image"
               />
-              
-              <Badge className="floating-badge -bottom-6 -left-6 bg-accent text-accent-foreground" data-testid="badge-doorstep">
-                <HomeIcon className="h-5 w-5 mr-2" />
-                Virtual Salon
-              </Badge>
               
               <Badge className="floating-badge -top-6 -right-6 bg-primary text-primary-foreground" data-testid="badge-rating">
                 <Star className="h-5 w-5 mr-2" />
@@ -193,34 +223,43 @@ export default function Home() {
                 icon: QrCode,
                 title: "1. Scan QR Code",
                 description: "Scan our QR code from flyers, products, or salon materials to instantly connect with our AI assistant.",
-                color: "bg-primary"
+                color: "bg-primary",
+                href: "/scan-qr"
               },
               {
                 icon: Bot,
                 title: "2. Chat with AI",
                 description: "Our AI assistant will understand your needs and recommend the perfect services for you and your family.",
-                color: "bg-accent"
+                color: "bg-accent",
+                href: "/ai-chat"
               },
               {
                 icon: CheckCircle,
                 title: "3. Book Appointment", 
                 description: "Choose your preferred date, time, and location. Our system will confirm your booking instantly.",
-                color: "bg-primary"
+                color: "bg-primary",
+                href: "/booking"
               },
               {
                 icon: HomeIcon,
                 title: "4. Enjoy Service",
                 description: "Our professional stylist arrives at your doorstep with all equipment for a premium salon experience.",
-                color: "bg-accent"
+                color: "bg-accent",
+                href: "/about-service"
               }
             ].map((step, index) => (
-              <div key={index} className="text-center group" data-testid={`step-${index + 1}`}>
+              <a 
+                key={index} 
+                href={step.href}
+                className="text-center group cursor-pointer block hover:scale-105 transition-transform"
+                data-testid={`step-${index + 1}`}
+              >
                 <div className={`w-20 h-20 ${step.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}>
                   <step.icon className="text-white text-2xl h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-serif font-semibold mb-4">{step.title}</h3>
-                <p className="text-muted-foreground">{step.description}</p>
-              </div>
+                <h3 className="text-xl font-serif font-semibold mb-4 group-hover:text-primary transition-colors">{step.title}</h3>
+                <p className="text-muted-foreground group-hover:text-foreground transition-colors">{step.description}</p>
+              </a>
             ))}
           </div>
         </div>
@@ -312,7 +351,7 @@ export default function Home() {
                 <div className="flex items-center space-x-2">
                   <Input placeholder="Type your message..." className="flex-1" disabled />
                   <Button size="icon" disabled className="btn-primary">
-                    <Camera className="h-4 w-4" />
+                    <Bot className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -449,49 +488,70 @@ export default function Home() {
             {/* Contact Form */}
             <Card className="p-8" data-testid="contact-form">
               <h3 className="text-2xl font-serif font-semibold mb-6">Send us a Message</h3>
-              <form className="space-y-6">
+              <form onSubmit={handleContactSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Name</label>
-                    <Input placeholder="Your name" data-testid="input-contact-name" />
+                    <label className="block text-sm font-medium text-foreground mb-2">Name *</label>
+                    <Input 
+                      placeholder="Your name" 
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                      data-testid="input-contact-name"
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Phone</label>
-                    <Input type="tel" placeholder="Your phone number" data-testid="input-contact-phone" />
+                    <label className="block text-sm font-medium text-foreground mb-2">Phone *</label>
+                    <Input 
+                      type="tel" 
+                      placeholder="Your phone number" 
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+                      data-testid="input-contact-phone"
+                      required
+                    />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Service Interest</label>
-                  <Select>
+                  <label className="block text-sm font-medium text-foreground mb-2">Service Interest *</label>
+                  <Select 
+                    value={contactForm.serviceInterest}
+                    onValueChange={(value) => setContactForm({...contactForm, serviceInterest: value})}
+                  >
                     <SelectTrigger data-testid="select-service-interest">
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="womens-hair">Women's Hair Services</SelectItem>
-                      <SelectItem value="kids-hair">Kids Hair Services</SelectItem>
-                      <SelectItem value="hair-spa">Hair Spa & Treatment</SelectItem>
-                      <SelectItem value="bridal">Bridal & Party Styling</SelectItem>
-                      <SelectItem value="hair-coloring">Hair Coloring</SelectItem>
-                      <SelectItem value="consultation">Consultation</SelectItem>
+                      <SelectItem value="Women's Hair Services">Women's Hair Services</SelectItem>
+                      <SelectItem value="Kids Hair Services">Kids Hair Services</SelectItem>
+                      <SelectItem value="Hair Spa & Treatment">Hair Spa & Treatment</SelectItem>
+                      <SelectItem value="Bridal & Party Styling">Bridal & Party Styling</SelectItem>
+                      <SelectItem value="Hair Coloring">Hair Coloring</SelectItem>
+                      <SelectItem value="Consultation">Consultation</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Address</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Address *</label>
                   <Textarea 
                     placeholder="Your full address for doorstep service" 
                     className="h-24"
+                    value={contactForm.address}
+                    onChange={(e) => setContactForm({...contactForm, address: e.target.value})}
                     data-testid="textarea-contact-address"
+                    required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Message</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Message (Optional)</label>
                   <Textarea 
                     placeholder="Tell us about your requirements" 
                     className="h-24"
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
                     data-testid="textarea-contact-message"
                   />
                 </div>
@@ -499,9 +559,10 @@ export default function Home() {
                 <Button 
                   type="submit" 
                   className="w-full btn-accent"
+                  disabled={contactMutation.isPending}
                   data-testid="button-send-message"
                 >
-                  Send Message
+                  {contactMutation.isPending ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </Card>
@@ -577,13 +638,6 @@ export default function Home() {
       >
         <Bot className="h-6 w-6" />
       </Button>
-
-      {/* QR Scanner Modal */}
-      <QRScanner 
-        isOpen={showQRScanner}
-        onClose={() => setShowQRScanner(false)}
-        onScanSuccess={handleQRScan}
-      />
 
       {/* AI Chat Modal */}
       <AIChat

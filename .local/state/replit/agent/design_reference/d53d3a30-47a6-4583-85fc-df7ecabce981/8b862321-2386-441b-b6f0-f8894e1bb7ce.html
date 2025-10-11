@@ -1,0 +1,1031 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glow & Grace Salon - AI-Powered Beauty Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                }
+            }
+        }
+    };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --radius: 0.75rem;
+            --background: hsl(35 20% 98%);
+            --foreground: hsl(20 14% 15%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(20 14% 15%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(20 14% 15%);
+            --primary: hsl(346 77% 68%);
+            --primary-foreground: hsl(355 20% 97%);
+            --secondary: hsl(35 20% 94%);
+            --secondary-foreground: hsl(25 25% 25%);
+            --muted: hsl(35 15% 92%);
+            --muted-foreground: hsl(25 15% 45%);
+            --accent: hsl(25 65% 85%);
+            --accent-foreground: hsl(20 14% 15%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(355 20% 97%);
+            --border: hsl(20 13% 87%);
+            --input: hsl(20 13% 87%);
+            --ring: hsl(346 77% 68%);
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+        
+        .font-serif {
+            font-family: var(--font-serif);
+        }
+        
+        .font-sans {
+            font-family: var(--font-sans);
+        }
+        
+        .ai-chat-bubble {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, hsl(35 20% 98%) 0%, hsl(25 65% 95%) 100%);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-8px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- @COMPONENT: Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-spa text-primary-foreground"></i>
+                    </div>
+                    <h1 class="text-xl font-serif font-semibold text-foreground">Glow & Grace</h1>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#services" class="text-muted-foreground hover:text-foreground transition-colors">Services</a>
+                    <a href="#about" class="text-muted-foreground hover:text-foreground transition-colors">About</a>
+                    <a href="#contact" class="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+                    <button class="bg-primary text-primary-foreground px-6 py-2 rounded-md hover:bg-primary/90 transition-colors font-medium">
+                        Book Now
+                    </button>
+                </div>
+                
+                <button class="md:hidden text-foreground" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: MobileMenu -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-background/95 backdrop-blur-md hidden">
+        <div class="flex flex-col items-center justify-center h-full space-y-8 text-lg">
+            <a href="#services" class="text-foreground hover:text-primary transition-colors">Services</a>
+            <a href="#about" class="text-foreground hover:text-primary transition-colors">About</a>
+            <a href="#contact" class="text-foreground hover:text-primary transition-colors">Contact</a>
+            <button class="bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium">Book Now</button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: MobileMenu -->
+
+    <!-- @COMPONENT: HeroSection -->
+    <section class="hero-gradient min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+                        Beauty Meets <span class="text-primary">AI Intelligence</span>
+                    </h1>
+                    <p class="text-xl text-muted-foreground mb-8 leading-relaxed">
+                        Experience personalized beauty consultations with our AI assistant. Simply scan the QR code and let our intelligent system help you discover the perfect services for your unique needs.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+                        <button onclick="openQRScanner()" class="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-all flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-qrcode"></i>
+                            <span>Scan QR & Talk to AI</span>
+                        </button>
+                        <button onclick="openBookingModal()" class="border border-border bg-card text-card-foreground px-8 py-4 rounded-xl font-semibold text-lg hover:bg-accent transition-all">
+                            Browse Services
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-center lg:justify-start space-x-6 text-sm text-muted-foreground">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <span>4.9/5 Rating</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-users"></i>
+                            <span>2000+ Happy Clients</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-clock"></i>
+                            <span>24/7 AI Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <!-- Luxury salon interior with modern styling and warm lighting -->
+                    <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Luxury salon interior" class="rounded-3xl shadow-2xl w-full h-auto" data-mock="true" />
+                    
+                    <!-- QR Code Floating Element -->
+                    <div class="absolute -bottom-6 -left-6 bg-card p-6 rounded-2xl shadow-xl border border-border">
+                        <div class="text-center">
+                            <div class="w-24 h-24 bg-foreground mx-auto mb-3 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-qrcode text-background text-2xl"></i>
+                            </div>
+                            <p class="text-sm font-medium text-muted-foreground">Scan to Start</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: HeroSection -->
+
+    <!-- @COMPONENT: ServicesSection -->
+    <section id="services" class="py-20 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-foreground mb-6">
+                    Our Premium Services
+                </h2>
+                <p class="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    Discover our comprehensive range of beauty and wellness services, each designed to enhance your natural radiance with expert care and premium products.
+                </p>
+            </div>
+            
+            <!-- Hair Services -->
+            <div class="mb-16">
+                <h3 class="font-serif text-3xl font-semibold text-foreground mb-8 text-center">Hair Services</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- @MAP: hairServices.map(service => ( -->
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Professional hair coloring session in a modern salon -->
+                        <img src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" alt="Hair coloring service" class="w-full h-48 object-cover" data-mock-image="true" />
+                        <div class="p-6">
+                            <h4 class="font-serif text-xl font-semibold text-card-foreground mb-2" data-bind="service.name">Hair Coloring & Highlights</h4>
+                            <p class="text-muted-foreground text-sm mb-4" data-bind="service.description">Professional color treatments including balayage, ombre, and full color transformations</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-bold text-primary" data-bind="service.price">₹3,500</span>
+                                <button onclick="askAIAboutService('hair-coloring')" class="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Hairstylist cutting hair in a professional salon setting -->
+                        <img src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" alt="Hair styling service" class="w-full h-48 object-cover" data-mock-image="true" />
+                        <div class="p-6">
+                            <h4 class="font-serif text-xl font-semibold text-card-foreground mb-2" data-bind="service.name">Hair Styling & Cut</h4>
+                            <p class="text-muted-foreground text-sm mb-4" data-bind="service.description">Expert cuts, styling, and blowouts tailored to your face shape and lifestyle</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-bold text-primary" data-bind="service.price">₹1,800</span>
+                                <button onclick="askAIAboutService('hair-styling')" class="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Hair treatment and keratin therapy in luxury salon -->
+                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400" alt="Hair treatment service" class="w-full h-48 object-cover" data-mock-image="true" />
+                        <div class="p-6">
+                            <h4 class="font-serif text-xl font-semibold text-card-foreground mb-2" data-bind="service.name">Hair Treatment & Spa</h4>
+                            <p class="text-muted-foreground text-sm mb-4" data-bind="service.description">Deep conditioning, keratin treatments, and scalp therapies for healthy hair</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-bold text-primary" data-bind="service.price">₹4,200</span>
+                                <button onclick="askAIAboutService('hair-treatment')" class="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+            
+            <!-- Spa & Wellness Services -->
+            <div class="mb-16">
+                <h3 class="font-serif text-3xl font-semibold text-foreground mb-8 text-center">Spa & Wellness</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Relaxing facial treatment with cucumber and skincare products -->
+                        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Facial treatment service" class="w-full h-40 object-cover" data-mock-image="true" />
+                        <div class="p-5">
+                            <h4 class="font-serif text-lg font-semibold text-card-foreground mb-2" data-bind="service.name">Premium Facials</h4>
+                            <p class="text-muted-foreground text-sm mb-3" data-bind="service.description">Deep cleansing, hydrating, and anti-aging treatments</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-primary" data-bind="service.price">₹2,500</span>
+                                <button onclick="askAIAboutService('facial')" class="bg-accent text-accent-foreground px-3 py-1 rounded-lg text-xs font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Therapeutic massage therapy in serene spa environment -->
+                        <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Massage therapy service" class="w-full h-40 object-cover" data-mock-image="true" />
+                        <div class="p-5">
+                            <h4 class="font-serif text-lg font-semibold text-card-foreground mb-2" data-bind="service.name">Massage Therapy</h4>
+                            <p class="text-muted-foreground text-sm mb-3" data-bind="service.description">Relaxing Swedish, deep tissue, and hot stone massages</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-primary" data-bind="service.price">₹3,000</span>
+                                <button onclick="askAIAboutService('massage')" class="bg-accent text-accent-foreground px-3 py-1 rounded-lg text-xs font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Professional manicure and nail art in elegant salon -->
+                        <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Nail care service" class="w-full h-40 object-cover" data-mock-image="true" />
+                        <div class="p-5">
+                            <h4 class="font-serif text-lg font-semibold text-card-foreground mb-2" data-bind="service.name">Nail Care</h4>
+                            <p class="text-muted-foreground text-sm mb-3" data-bind="service.description">Manicures, pedicures, and nail art by certified technicians</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-primary" data-bind="service.price">₹1,200</span>
+                                <button onclick="askAIAboutService('nails')" class="bg-accent text-accent-foreground px-3 py-1 rounded-lg text-xs font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="service-card bg-card rounded-2xl overflow-hidden shadow-lg border border-border hover:shadow-2xl transition-all duration-300">
+                        <!-- Professional makeup application and beauty consultation -->
+                        <img src="https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Makeup service" class="w-full h-40 object-cover" data-mock-image="true" />
+                        <div class="p-5">
+                            <h4 class="font-serif text-lg font-semibold text-card-foreground mb-2" data-bind="service.name">Makeup Services</h4>
+                            <p class="text-muted-foreground text-sm mb-3" data-bind="service.description">Bridal, party, and everyday makeup by expert artists</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-primary" data-bind="service.price">₹2,800</span>
+                                <button onclick="askAIAboutService('makeup')" class="bg-accent text-accent-foreground px-3 py-1 rounded-lg text-xs font-medium hover:bg-accent/80 transition-colors">
+                                    Ask AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beauty Products Section -->
+            <div class="mb-16">
+                <h3 class="font-serif text-3xl font-semibold text-foreground mb-8 text-center">Premium Beauty Products</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-shadow">
+                        <!-- Premium skincare products arranged elegantly -->
+                        <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=300" alt="Skincare products" class="w-full h-32 object-cover rounded-lg mb-4" data-mock-image="true" />
+                        <h4 class="font-semibold text-card-foreground mb-2">Skincare Essentials</h4>
+                        <p class="text-sm text-muted-foreground">Professional-grade serums and creams</p>
+                    </div>
+
+                    <div class="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-shadow">
+                        <!-- Professional hair care products and treatments -->
+                        <img src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=300" alt="Hair care products" class="w-full h-32 object-cover rounded-lg mb-4" data-mock-image="true" />
+                        <h4 class="font-semibold text-card-foreground mb-2">Hair Care Line</h4>
+                        <p class="text-sm text-muted-foreground">Salon-quality shampoos and treatments</p>
+                    </div>
+
+                    <div class="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-shadow">
+                        <!-- Luxury makeup collection with brushes and cosmetics -->
+                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=300" alt="Makeup products" class="w-full h-32 object-cover rounded-lg mb-4" data-mock-image="true" />
+                        <h4 class="font-semibold text-card-foreground mb-2">Makeup Collection</h4>
+                        <p class="text-sm text-muted-foreground">Premium cosmetics and tools</p>
+                    </div>
+
+                    <div class="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-shadow">
+                        <!-- Spa aromatherapy oils and wellness products -->
+                        <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=300" alt="Spa wellness products" class="w-full h-32 object-cover rounded-lg mb-4" data-mock-image="true" />
+                        <h4 class="font-semibold text-card-foreground mb-2">Spa Wellness</h4>
+                        <p class="text-sm text-muted-foreground">Aromatherapy and relaxation essentials</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ServicesSection -->
+
+    <!-- @COMPONENT: AIExperienceSection -->
+    <section class="py-20 bg-secondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-secondary-foreground mb-6">
+                        Meet Your AI Beauty Consultant
+                    </h2>
+                    <p class="text-lg text-muted-foreground mb-8 leading-relaxed">
+                        Our advanced AI assistant understands your beauty needs and provides personalized recommendations. Simply scan our QR code or start chatting to get expert advice on services, scheduling, and aftercare.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-brain text-primary-foreground text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-secondary-foreground">Intelligent Recommendations</h4>
+                                <p class="text-muted-foreground text-sm">AI analyzes your preferences and suggests the perfect services</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-calendar-alt text-primary-foreground text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-secondary-foreground">Smart Scheduling</h4>
+                                <p class="text-muted-foreground text-sm">Book appointments instantly with real-time availability</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-comment-dots text-primary-foreground text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-secondary-foreground">24/7 Assistance</h4>
+                                <p class="text-muted-foreground text-sm">Get instant answers to questions about services and care</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="openAIChat()" class="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-all flex items-center space-x-2 shadow-lg">
+                        <i class="fas fa-robot"></i>
+                        <span>Start AI Consultation</span>
+                    </button>
+                </div>
+                
+                <div class="relative">
+                    <!-- Modern salon interior showcasing AI technology integration -->
+                    <img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=700&h=500" alt="Modern salon with technology integration" class="rounded-2xl shadow-xl w-full h-auto" data-mock-image="true" />
+                    
+                    <!-- AI Chat Preview -->
+                    <div class="absolute -bottom-8 -right-8 glassmorphism rounded-2xl p-4 max-w-sm shadow-2xl">
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-2">
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-robot text-primary-foreground text-sm"></i>
+                                </div>
+                                <div class="bg-card rounded-lg p-3 flex-1">
+                                    <p class="text-sm text-card-foreground">Hi! I'm your AI beauty consultant. What service interests you today?</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <div class="bg-primary rounded-lg p-3 max-w-xs">
+                                    <p class="text-sm text-primary-foreground">I need a hair treatment and spa package</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: AIExperienceSection -->
+
+    <!-- @COMPONENT: AboutSection -->
+    <section id="about" class="py-20 bg-background">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <!-- Elegant salon interior with modern equipment and styling chairs -->
+                    <img src="https://images.unsplash.com/photo-1559599101-f09722fb4948?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=700&h=500" alt="Elegant salon interior" class="rounded-2xl shadow-xl w-full h-auto" data-mock-image="true" />
+                </div>
+                
+                <div>
+                    <h2 class="font-serif text-4xl md:text-5xl font-bold text-foreground mb-6">
+                        Where Beauty Meets Innovation
+                    </h2>
+                    <p class="text-lg text-muted-foreground mb-6 leading-relaxed">
+                        At Glow & Grace, we've revolutionized the beauty experience by combining expert craftsmanship with cutting-edge AI technology. Our team of certified professionals works alongside our intelligent booking system to provide you with seamless, personalized service.
+                    </p>
+                    <p class="text-lg text-muted-foreground mb-8 leading-relaxed">
+                        From the moment you scan our QR code to your final touch-up, every step is designed to exceed your expectations and leave you feeling radiant and confident.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2" data-bind="stats.experience">8+</div>
+                            <p class="text-muted-foreground">Years Experience</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2" data-bind="stats.specialists">15+</div>
+                            <p class="text-muted-foreground">Beauty Specialists</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2" data-bind="stats.clients">2000+</div>
+                            <p class="text-muted-foreground">Happy Clients</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary mb-2" data-bind="stats.rating">4.9</div>
+                            <p class="text-muted-foreground">Average Rating</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: AboutSection -->
+
+    <!-- @COMPONENT: FooterSection -->
+    <footer class="bg-foreground text-background py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-spa text-primary-foreground"></i>
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold">Glow & Grace Salon</h3>
+                    </div>
+                    <p class="text-background/70 mb-6 leading-relaxed">
+                        Experience the future of beauty with our AI-powered salon. Book appointments, get personalized recommendations, and enjoy premium services in our state-of-the-art facility.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-background/70">
+                        <li><a href="#services" class="hover:text-background transition-colors">Services</a></li>
+                        <li><a href="#" class="hover:text-background transition-colors">Pricing</a></li>
+                        <li><a href="#about" class="hover:text-background transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-background transition-colors">Gallery</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-background/70">
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span data-bind="contact.phone">+91 98765 43210</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span data-bind="contact.email">info@glowgrace.com</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span data-bind="contact.address">123 Beauty Lane, City</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-background/20 mt-12 pt-8 text-center text-background/60">
+                <p>&copy; 2024 Glow & Grace Salon. All rights reserved. | Powered by AI Technology</p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: FooterSection -->
+
+    <!-- @COMPONENT: QRScannerModal -->
+    <div id="qr-scanner-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-card rounded-2xl p-8 max-w-md mx-4 w-full">
+            <div class="text-center mb-6">
+                <h3 class="font-serif text-2xl font-bold text-card-foreground mb-2">QR Code Scanner</h3>
+                <p class="text-muted-foreground">Point your camera at the QR code to start your AI consultation</p>
+            </div>
+            
+            <div class="bg-muted rounded-xl p-8 mb-6 text-center">
+                <div class="w-32 h-32 mx-auto mb-4 bg-foreground rounded-xl flex items-center justify-center">
+                    <i class="fas fa-camera text-background text-3xl"></i>
+                </div>
+                <p class="text-muted-foreground text-sm">Camera access required for QR scanning</p>
+                <!-- @FUNCTIONALITY: Implement QR scanner using jsQR or QuaggaJS library -->
+            </div>
+            
+            <div class="flex space-x-4">
+                <button onclick="closeQRScanner()" class="flex-1 border border-border text-foreground px-4 py-2 rounded-lg hover:bg-muted transition-colors">
+                    Cancel
+                </button>
+                <button onclick="simulateQRScan()" class="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                    Test Scan
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: QRScannerModal -->
+
+    <!-- @COMPONENT: AIChatModal -->
+    <div id="ai-chat-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-card rounded-2xl w-full max-w-lg mx-4 h-[600px] flex flex-col">
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between p-6 border-b border-border">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-robot text-primary-foreground"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-card-foreground">AI Beauty Consultant</h3>
+                        <p class="text-sm text-muted-foreground">Online now</p>
+                    </div>
+                </div>
+                <button onclick="closeAIChat()" class="text-muted-foreground hover:text-foreground">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- @STATE: messages:array = [] -->
+                <div class="ai-chat-bubble">
+                    <div class="flex items-start space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                        </div>
+                        <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-secondary-foreground">Hello! I'm your AI beauty consultant. How can I help you today? Are you looking for hair services, spa treatments, or makeup?</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Mock conversation for demonstration -->
+                <div class="flex justify-end" data-mock="true">
+                    <div class="bg-primary rounded-lg p-3 max-w-xs">
+                        <p class="text-sm text-primary-foreground">I want a hair treatment and spa package</p>
+                    </div>
+                </div>
+                
+                <div class="ai-chat-bubble" data-mock="true">
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                        </div>
+                        <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-secondary-foreground">Perfect! We have keratin treatment, Olaplex repair, and scalp detox packages. For spa, we offer relaxation packages with massage and facial. Would you like to see available time slots for this week?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Input -->
+            <div class="p-6 border-t border-border">
+                <div class="flex space-x-4">
+                    <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 bg-input border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                    <button onclick="sendMessage()" class="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4 mt-4">
+                    <button onclick="startVoiceChat()" class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fas fa-microphone"></i>
+                        <span class="text-sm">Voice Chat</span>
+                    </button>
+                    <button onclick="showQuickServices()" class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fas fa-list"></i>
+                        <span class="text-sm">Quick Services</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AIChatModal -->
+
+    <!-- @COMPONENT: BookingModal -->
+    <div id="booking-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-card rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-card p-6 border-b border-border rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-serif text-2xl font-bold text-card-foreground">Book Your Appointment</h3>
+                    <button onclick="closeBookingModal()" class="text-muted-foreground hover:text-foreground">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- @STATE: bookingStep:number = 1 -->
+                <div id="booking-step-1">
+                    <h4 class="font-semibold text-lg text-card-foreground mb-4">Select Services</h4>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <label class="relative">
+                            <input type="checkbox" class="peer hidden" data-service="hair-color" />
+                            <div class="border border-border rounded-lg p-4 cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <div class="font-semibold text-card-foreground">Hair Coloring</div>
+                                <div class="text-sm text-muted-foreground">₹3,500</div>
+                            </div>
+                        </label>
+                        
+                        <label class="relative">
+                            <input type="checkbox" class="peer hidden" data-service="hair-spa" />
+                            <div class="border border-border rounded-lg p-4 cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <div class="font-semibold text-card-foreground">Hair Spa</div>
+                                <div class="text-sm text-muted-foreground">₹4,200</div>
+                            </div>
+                        </label>
+                        
+                        <label class="relative">
+                            <input type="checkbox" class="peer hidden" data-service="facial" />
+                            <div class="border border-border rounded-lg p-4 cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <div class="font-semibold text-card-foreground">Premium Facial</div>
+                                <div class="text-sm text-muted-foreground">₹2,500</div>
+                            </div>
+                        </label>
+                        
+                        <label class="relative">
+                            <input type="checkbox" class="peer hidden" data-service="massage" />
+                            <div class="border border-border rounded-lg p-4 cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <div class="font-semibold text-card-foreground">Massage</div>
+                                <div class="text-sm text-muted-foreground">₹3,000</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="booking-step-2" class="hidden">
+                    <h4 class="font-semibold text-lg text-card-foreground mb-4">Select Date & Time</h4>
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-card-foreground mb-2">Preferred Date</label>
+                            <input type="date" class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="booking.date" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-card-foreground mb-2">Preferred Time</label>
+                            <select class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="booking.time">
+                                <option value="">Select Time</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="16:00">4:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="booking-step-3" class="hidden">
+                    <h4 class="font-semibold text-lg text-card-foreground mb-4">Your Information</h4>
+                    <div class="space-y-4 mb-6">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-card-foreground mb-2">First Name</label>
+                                <input type="text" placeholder="Enter first name" class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="customer.firstName" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-card-foreground mb-2">Last Name</label>
+                                <input type="text" placeholder="Enter last name" class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="customer.lastName" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-card-foreground mb-2">Phone Number</label>
+                            <input type="tel" placeholder="+91 98765 43210" class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="customer.phone" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-card-foreground mb-2">Email</label>
+                            <input type="email" placeholder="your.email@example.com" class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring" data-bind="customer.email" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-card-foreground mb-2">Special Requests (Optional)</label>
+                            <textarea placeholder="Any specific requirements or preferences..." class="w-full bg-input border border-border rounded-lg px-4 py-3 text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring h-20 resize-none" data-bind="customer.notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button id="back-btn" onclick="previousStep()" class="hidden border border-border text-foreground px-6 py-3 rounded-lg hover:bg-muted transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                    <div class="flex-1"></div>
+                    <button id="next-btn" onclick="nextStep()" class="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors" data-event="click:handleBookingStep">
+                        Next<i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: BookingModal -->
+
+    <!-- @COMPONENT: ConfirmationModal -->
+    <div id="confirmation-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-card rounded-2xl p-8 max-w-md mx-4 w-full text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="font-serif text-2xl font-bold text-card-foreground mb-4">Booking Confirmed!</h3>
+            <p class="text-muted-foreground mb-6">Your appointment has been successfully scheduled. You'll receive a confirmation via SMS and email shortly.</p>
+            
+            <div class="bg-muted rounded-lg p-4 mb-6 text-left">
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Date:</span>
+                        <span class="text-foreground" data-bind="booking.confirmedDate">March 15, 2024</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Time:</span>
+                        <span class="text-foreground" data-bind="booking.confirmedTime">2:00 PM</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Total:</span>
+                        <span class="text-foreground font-semibold" data-bind="booking.total">₹7,700</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="closeConfirmation()" class="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium">
+                Done
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ConfirmationModal -->
+
+    <!-- Floating AI Assistant Button -->
+    <button onclick="openAIChat()" class="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-40 hover:scale-105">
+        <i class="fas fa-robot text-primary-foreground text-xl"></i>
+    </button>
+
+    <script>
+        (function() {
+            // Mobile menu toggle
+            window.toggleMobileMenu = function() {
+                const menu = document.getElementById('mobile-menu');
+                menu.classList.toggle('hidden');
+            };
+
+            // QR Scanner functionality
+            window.openQRScanner = function() {
+                document.getElementById('qr-scanner-modal').classList.remove('hidden');
+                // TODO: Initialize camera and QR scanning library (jsQR or QuaggaJS)
+            };
+
+            window.closeQRScanner = function() {
+                document.getElementById('qr-scanner-modal').classList.add('hidden');
+                // TODO: Stop camera stream
+            };
+
+            window.simulateQRScan = function() {
+                closeQRScanner();
+                // TODO: Simulate QR scan result and trigger AI interaction
+                setTimeout(() => {
+                    openAIChat();
+                    // Add simulated AI message
+                    addAIMessage("I detected you scanned our QR code! Welcome to Glow & Grace. I see you're interested in our services. What type of treatment are you looking for today?");
+                }, 500);
+            };
+
+            // AI Chat functionality
+            window.openAIChat = function() {
+                document.getElementById('ai-chat-modal').classList.remove('hidden');
+                // TODO: Initialize AI chat session with OpenAI API
+            };
+
+            window.closeAIChat = function() {
+                document.getElementById('ai-chat-modal').classList.add('hidden');
+            };
+
+            window.sendMessage = function() {
+                const input = document.getElementById('chat-input');
+                const message = input.value.trim();
+                if (!message) return;
+
+                // Add user message to chat
+                addUserMessage(message);
+                input.value = '';
+
+                // TODO: Send message to OpenAI API and get response
+                // Simulate AI response for demo
+                setTimeout(() => {
+                    addAIMessage("That sounds great! I can help you with that. Would you like me to check our availability for this week and book an appointment?");
+                }, 1000);
+            };
+
+            window.addUserMessage = function(message) {
+                const chatMessages = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex justify-end';
+                messageDiv.innerHTML = `
+                    <div class="bg-primary rounded-lg p-3 max-w-xs">
+                        <p class="text-sm text-primary-foreground">${message}</p>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            window.addAIMessage = function(message) {
+                const chatMessages = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'ai-chat-bubble';
+                messageDiv.innerHTML = `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-primary-foreground text-xs"></i>
+                        </div>
+                        <div class="bg-secondary rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-secondary-foreground">${message}</p>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            window.askAIAboutService = function(serviceType) {
+                openAIChat();
+                // TODO: Load service-specific AI context
+                setTimeout(() => {
+                    addAIMessage(`I'd be happy to help you with our ${serviceType} services! What specific questions do you have about this treatment?`);
+                }, 500);
+            };
+
+            window.startVoiceChat = function() {
+                // TODO: Initialize WebRTC voice chat with AI
+                addAIMessage("Voice chat feature coming soon! For now, please continue with text chat.");
+            };
+
+            window.showQuickServices = function() {
+                addAIMessage("Here are our popular services: Hair Coloring (₹3,500), Hair Spa (₹4,200), Premium Facial (₹2,500), Massage (₹3,000). Which one interests you?");
+            };
+
+            // Booking modal functionality
+            let currentBookingStep = 1;
+
+            window.openBookingModal = function() {
+                document.getElementById('booking-modal').classList.remove('hidden');
+                currentBookingStep = 1;
+                updateBookingStep();
+            };
+
+            window.closeBookingModal = function() {
+                document.getElementById('booking-modal').classList.add('hidden');
+                currentBookingStep = 1;
+                updateBookingStep();
+            };
+
+            window.nextStep = function() {
+                if (currentBookingStep < 3) {
+                    currentBookingStep++;
+                    updateBookingStep();
+                } else {
+                    // TODO: Submit booking data to backend
+                    submitBooking();
+                }
+            };
+
+            window.previousStep = function() {
+                if (currentBookingStep > 1) {
+                    currentBookingStep--;
+                    updateBookingStep();
+                }
+            };
+
+            function updateBookingStep() {
+                // Hide all steps
+                for (let i = 1; i <= 3; i++) {
+                    document.getElementById(`booking-step-${i}`).classList.add('hidden');
+                }
+                
+                // Show current step
+                document.getElementById(`booking-step-${currentBookingStep}`).classList.remove('hidden');
+                
+                // Update navigation buttons
+                const backBtn = document.getElementById('back-btn');
+                const nextBtn = document.getElementById('next-btn');
+                
+                if (currentBookingStep === 1) {
+                    backBtn.classList.add('hidden');
+                } else {
+                    backBtn.classList.remove('hidden');
+                }
+                
+                if (currentBookingStep === 3) {
+                    nextBtn.innerHTML = 'Confirm Booking<i class="fas fa-check ml-2"></i>';
+                } else {
+                    nextBtn.innerHTML = 'Next<i class="fas fa-arrow-right ml-2"></i>';
+                }
+            }
+
+            function submitBooking() {
+                // TODO: Implement booking submission logic
+                closeBookingModal();
+                document.getElementById('confirmation-modal').classList.remove('hidden');
+            }
+
+            window.closeConfirmation = function() {
+                document.getElementById('confirmation-modal').classList.add('hidden');
+            };
+
+            // Handle Enter key in chat input
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Close modals on backdrop click
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('backdrop-blur-sm')) {
+                    const modals = ['qr-scanner-modal', 'ai-chat-modal', 'booking-modal', 'confirmation-modal'];
+                    modals.forEach(modalId => {
+                        document.getElementById(modalId).classList.add('hidden');
+                    });
+                }
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

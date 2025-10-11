@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import type { Service } from "@shared/schema";
 
 export default function Services() {
   const params = useParams();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(params.category || "all");
   const [sortBy, setSortBy] = useState("name");
@@ -55,8 +56,8 @@ export default function Services() {
   };
 
   const handleServiceBook = (service: Service) => {
-    setShowAIChat(true);
-    setAiInitialMessage(`I would like to book ${service.name}. Can you help me schedule an appointment?`);
+    // Redirect to booking page instead of opening AI chat
+    setLocation("/booking");
   };
 
   if (isLoading) {

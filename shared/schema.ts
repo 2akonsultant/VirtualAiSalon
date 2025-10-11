@@ -44,6 +44,18 @@ export const aiConversations = pgTable("ai_conversations", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+export const contactMessages = pgTable("contact_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  serviceInterest: text("service_interest").notNull(),
+  address: text("address").notNull(),
+  message: text("message").notNull(),
+  emailSent: boolean("email_sent").default(false),
+  excelUpdated: boolean("excel_updated").default(false),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const insertServiceSchema = createInsertSchema(services).omit({
   id: true,
   isActive: true,
@@ -58,6 +70,13 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   id: true,
   createdAt: true,
   status: true,
+}).extend({
+  appointmentDate: z.string().or(z.date()).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }),
 });
 
 export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
@@ -65,12 +84,21 @@ export const insertAiConversationSchema = createInsertSchema(aiConversations).om
   createdAt: true,
 });
 
+export const insertContactMessageSchema = createInsertSchema(contactMessages).omit({
+  id: true,
+  createdAt: true,
+  emailSent: true,
+  excelUpdated: true,
+});
+
 export type Service = typeof services.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type AiConversation = typeof aiConversations.$inferSelect;
+export type ContactMessage = typeof contactMessages.$inferSelect;
 
 export type InsertService = z.infer<typeof insertServiceSchema>;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
+export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;

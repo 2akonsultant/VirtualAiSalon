@@ -10,6 +10,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: "/services", label: "Services" },
+    { href: "/dashboard", label: "Dashboard" },
     { href: "/", label: "How It Works", hash: "#how-it-works" },
     { href: "/", label: "Contact", hash: "#contact" },
   ];
