@@ -318,6 +318,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       id,
       ...userData,
+      role: userData.role || null,
       isVerified: false,
       otpAttempts: 0,
       createdAt: new Date(),

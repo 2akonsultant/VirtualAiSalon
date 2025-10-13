@@ -697,7 +697,7 @@ export async function sendCustomerBookingConfirmation(booking: BookingData): Pro
                               </td>
                               <td>
                                 <p style="margin: 0 0 4px 0; color: #b8a0b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Location</p>
-                                <p style="margin: 0; color: #9880a8; font-size: 16px; font-weight: 500; font-family: 'Georgia', serif;">${booking.location}</p>
+                                <p style="margin: 0; color: #9880a8; font-size: 16px; font-weight: 500; font-family: 'Georgia', serif;">${booking.notes || 'No location specified'}</p>
                               </td>
                             </tr>
                           </table>
@@ -779,7 +779,7 @@ export async function sendCustomerBookingConfirmation(booking: BookingData): Pro
     return true;
   } catch (error) {
     console.error('❌ Error sending customer booking confirmation:', error);
-    console.error('❌ Error details:', error.message);
+    console.error('❌ Error details:', error instanceof Error ? error.message : String(error));
     return false;
   }
 }

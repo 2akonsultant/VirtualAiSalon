@@ -78,7 +78,7 @@ export default function Dashboard() {
       const data = await response.json();
       console.log('📧 Messages received:', data.length, data);
       console.log('📋 First 3 messages:', data.slice(0, 3));
-      console.log('📅 All dates:', data.map(m => m['Submission Date']));
+      console.log('📅 All dates:', data.map((m: any) => m['Submission Date']));
       return data;
     },
     refetchInterval: 5000, // Auto-refresh every 5 seconds
