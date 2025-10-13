@@ -319,6 +319,7 @@ export class MemStorage implements IStorage {
       id,
       ...userData,
       role: userData.role || null,
+      phone: userData.phone || null,
       isVerified: false,
       otpAttempts: 0,
       createdAt: new Date(),
