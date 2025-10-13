@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Service } from "@shared/schema";
 
 export default function Home() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiInitialMessage, setAiInitialMessage] = useState("");
   const { toast } = useToast();
@@ -93,8 +93,7 @@ export default function Home() {
   };
 
   const handleServiceBook = (service: Service) => {
-    setShowAIChat(true);
-    setAiInitialMessage(`I would like to book ${service.name}. Can you help me schedule an appointment?`);
+    setLocation("/booking");
   };
 
   return (
@@ -132,7 +131,7 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  onClick={() => setShowAIChat(true)}
+                  onClick={() => setLocation("/booking")}
                   className="btn-primary flex items-center justify-center"
                   data-testid="button-book-appointment"
                 >
@@ -457,7 +456,7 @@ export default function Home() {
 
               <div className="mt-8 space-y-4">
                 <Button 
-                  onClick={() => setShowAIChat(true)}
+                  onClick={() => setLocation("/booking")}
                   className="w-full btn-primary flex items-center justify-center"
                   data-testid="button-book-appointment-contact"
                 >

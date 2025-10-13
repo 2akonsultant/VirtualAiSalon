@@ -66,16 +66,7 @@ export default function ServiceCard({ service, onAskAI, onBook }: ServiceCardPro
           </Button>
           
           <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log("🎯 Book This Service button clicked for:", service.name);
-              console.log("🎯 Service ID:", service.id);
-              console.log("🎯 onBook function type:", typeof onBook);
-              console.log("🎯 Calling onBook function...");
-              onBook(service);
-              console.log("🎯 onBook function called successfully");
-            }}
+            onClick={() => onBook(service)}
             className="w-full btn-primary hover:bg-primary/90 transition-colors"
             data-testid={`button-book-${service.id}`}
             type="button"
