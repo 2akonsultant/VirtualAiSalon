@@ -5,6 +5,7 @@ import { insertCustomerSchema, insertBookingSchema, insertAiConversationSchema, 
 import { z } from "zod";
 import OpenAI from "openai";
 import { processContactMessage, processBooking } from "./email-service";
+import { chatWithGemini, resetChatSession, testGeminiConnection } from "./gemini-service";
 import { 
   readBookingsExcel, 
   readContactMessagesExcel, 
@@ -339,23 +340,17 @@ Remember: You're helping someone feel pampered and excited about their salon exp
         ...messages.slice(-10).map(m => ({ role: m.role, content: m.content })) // Last 10 messages for context
       ];
 
-      // Get AI response
+      // Get AI response using Gemini
       let aiResponse: string;
       
       try {
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: openaiMessages,
-          max_tokens: 800,
-          temperature: 0.8,
-          presence_penalty: 0.6,
-          frequency_penalty: 0.5,
-        });
-        aiResponse = completion.choices[0].message.content || "I'm here to help! Please let me know what service you're interested in.";
-      } catch (openaiError: any) {
-        console.error("OpenAI API error:", openaiError.message);
+        console.log(`🤖 Using Gemini AI for chat response...`);
+        aiResponse = await chatWithGemini(message, sessionId);
+        console.log(`✅ Gemini response received: ${aiResponse.substring(0, 100)}...`);
+      } catch (geminiError: any) {
+        console.error("❌ Gemini AI Error:", geminiError.message);
         
-        // Fallback to rule-based responses if OpenAI fails
+        // Fallback to rule-based responses if Gemini fails
         aiResponse = generateFallbackResponse(message);
       }
       
@@ -566,6 +561,16 @@ app.get("/api/dashboard/messages", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch messages data" });
   }
 });
+
+  // Test Gemini AI connection on startup
+  console.log("\n🤖 Testing Gemini AI connection...");
+  testGeminiConnection().then(success => {
+    if (success) {
+      console.log("✅ Gemini AI is ready to chat!\n");
+    } else {
+      console.log("⚠️ Gemini AI connection failed - using fallback responses\n");
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
