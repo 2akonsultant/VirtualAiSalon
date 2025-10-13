@@ -1,23 +1,18 @@
 # Dependencies
 node_modules/
-*/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# Environment variables
-.env
+# Development files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Build outputs
+# Build artifacts
 dist/
 build/
-*/dist/
-*/build/
 
 # IDE and editor files
 .vscode/
@@ -35,6 +30,10 @@ build/
 ehthumbs.db
 Thumbs.db
 
+# Git
+.git/
+.gitignore
+
 # Logs
 logs/
 *.log
@@ -45,8 +44,10 @@ pids/
 *.seed
 *.pid.lock
 
-# Coverage directory
+# Coverage directory used by tools like istanbul
 coverage/
+
+# nyc test coverage
 .nyc_output
 
 # Dependency directories
@@ -64,7 +65,7 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# parcel-bundler cache
+# parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
 
@@ -106,6 +107,10 @@ test.py
 *.test.js
 *.spec.js
 
+# Documentation
+README.md
+*.md
+
 # Data files
 data/
 *.xlsx
@@ -113,10 +118,3 @@ data/
 
 # Local development
 .local/
-
-# Vercel
-.vercel/
-
-# Temporary files
-*.tmp
-*.temp

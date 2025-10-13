@@ -4,8 +4,11 @@ import { storage } from "./storage";
 import { insertCustomerSchema, insertBookingSchema, insertAiConversationSchema, insertContactMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
-import { processContactMessage, processBooking } from "./email-service";
+import { processContactMessage, processBooking, sendOTPEmail } from "./email-service";
 import { chatWithGemini, resetChatSession, testGeminiConnection } from "./gemini-service";
+import { hashPassword, comparePassword, generateToken } from "./auth-service";
+import { generateOTP, getOTPExpiry, isOTPExpired, isValidOTPFormat, isTooManyAttempts } from "./otp-service";
+import { requireAuth, requireAdmin } from "./middleware/auth-middleware";
 import { 
   readBookingsExcel, 
   readContactMessagesExcel, 
@@ -100,6 +103,352 @@ function generateFallbackResponse(message: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // ============================================
+  // AUTHENTICATION ROUTES WITH OTP
+  // ============================================
+
+  /**
+   * POST /api/auth/signup
+   * Register new user and send OTP
+   */
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, name, phone } = req.body;
+
+      // Validation
+      if (!email || !password || !name) {
+        return res.status(400).json({ 
+          message: "Email, password, and name are required" 
+        });
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+          message: "Invalid email format" 
+        });
+      }
+
+      // Password strength validation
+      if (password.length < 6) {
+        return res.status(400).json({ 
+          message: "Password must be at least 6 characters long" 
+        });
+      }
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        // If user exists but not verified, allow resending OTP
+        if (!existingUser.isVerified) {
+          // Generate new OTP
+          const otp = generateOTP();
+          const otpExpiry = getOTPExpiry();
+          
+          // Update OTP
+          await storage.updateUserOTP(existingUser.id, otp, otpExpiry);
+          
+          // Send OTP email
+          await sendOTPEmail(email, name, otp);
+          
+          return res.status(200).json({
+            message: "Account already exists but not verified. New OTP sent to your email.",
+            userId: existingUser.id,
+            email: existingUser.email,
+            requiresVerification: true,
+          });
+        }
+        
+        return res.status(400).json({ 
+          message: "Email already registered. Please login instead." 
+        });
+      }
+
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+
+      // Generate OTP
+      const otp = generateOTP();
+      const otpExpiry = getOTPExpiry();
+
+      // Create user (unverified)
+      const newUser = await storage.createUserWithOTP({
+        email,
+        password: hashedPassword,
+        name,
+        phone: phone || null,
+        role: "customer",
+        otp,
+        otpExpiry,
+      });
+
+      // Send OTP email
+      const emailSent = await sendOTPEmail(email, name, otp);
+
+      if (!emailSent) {
+        return res.status(500).json({
+          message: "Account created but failed to send verification email. Please contact support.",
+        });
+      }
+
+      console.log(`✅ User created: ${email}, OTP: ${otp}`);
+
+      res.status(201).json({
+        message: "Account created! Please check your email for verification code.",
+        userId: newUser.id,
+        email: newUser.email,
+        requiresVerification: true,
+      });
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      res.status(500).json({ 
+        message: "Failed to create account. Please try again." 
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/verify-otp
+   * Verify OTP and auto-login user
+   */
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { userId, otp } = req.body;
+
+      // Validation
+      if (!userId || !otp) {
+        return res.status(400).json({ 
+          message: "User ID and OTP are required" 
+        });
+      }
+
+      // Validate OTP format
+      if (!isValidOTPFormat(otp)) {
+        return res.status(400).json({ 
+          message: "Invalid OTP format. Please enter 6 digits." 
+        });
+      }
+
+      // Get user
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if already verified
+      if (user.isVerified) {
+        return res.status(400).json({ 
+          message: "Email already verified. Please login." 
+        });
+      }
+
+      // Check too many attempts
+      if (isTooManyAttempts(user.otpAttempts || 0)) {
+        return res.status(429).json({ 
+          message: "Too many failed attempts. Please request a new OTP." 
+        });
+      }
+
+      // Check OTP expiry
+      if (isOTPExpired(user.otpExpiry)) {
+        return res.status(400).json({ 
+          message: "OTP has expired. Please request a new one." 
+        });
+      }
+
+      // Verify OTP
+      if (user.otp !== otp) {
+        // Increment failed attempts
+        await storage.incrementOTPAttempts(userId);
+        
+        return res.status(400).json({ 
+          message: "Invalid OTP. Please try again.",
+          attemptsLeft: 5 - (user.otpAttempts || 0) - 1,
+        });
+      }
+
+      // OTP is correct - verify user
+      const verifiedUser = await storage.verifyUserOTP(userId);
+
+      if (!verifiedUser) {
+        return res.status(500).json({ message: "Failed to verify user" });
+      }
+
+      // Generate JWT token for auto-login
+      const token = generateToken(verifiedUser.id, verifiedUser.email, verifiedUser.role || "customer");
+
+      console.log(`✅ User verified and logged in: ${verifiedUser.email}`);
+
+      res.json({
+        message: "Email verified successfully! You're now logged in.",
+        token,
+        user: {
+          id: verifiedUser.id,
+          email: verifiedUser.email,
+          name: verifiedUser.name,
+          phone: verifiedUser.phone,
+          role: verifiedUser.role,
+          isVerified: true,
+        },
+      });
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      res.status(500).json({ 
+        message: "Verification failed. Please try again." 
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/resend-otp
+   * Resend OTP to user's email
+   */
+  app.post("/api/auth/resend-otp", async (req, res) => {
+    try {
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      // Get user
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if already verified
+      if (user.isVerified) {
+        return res.status(400).json({ 
+          message: "Email already verified. Please login." 
+        });
+      }
+
+      // Generate new OTP
+      const otp = generateOTP();
+      const otpExpiry = getOTPExpiry();
+
+      // Update OTP in database
+      await storage.updateUserOTP(userId, otp, otpExpiry);
+
+      // Send OTP email
+      const emailSent = await sendOTPEmail(user.email, user.name, otp);
+
+      if (!emailSent) {
+        return res.status(500).json({
+          message: "Failed to send OTP email. Please try again.",
+        });
+      }
+
+      console.log(`✅ OTP resent to: ${user.email}, New OTP: ${otp}`);
+
+      res.json({
+        message: "New verification code sent to your email!",
+      });
+    } catch (error: any) {
+      console.error("Resend OTP error:", error);
+      res.status(500).json({ 
+        message: "Failed to resend OTP. Please try again." 
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/login
+   * Login existing user (must be verified)
+   */
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: "Email and password are required" 
+        });
+      }
+
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        return res.status(401).json({ 
+          message: "Invalid email or password" 
+        });
+      }
+
+      // Check if email is verified
+      if (!user.isVerified) {
+        return res.status(403).json({ 
+          message: "Please verify your email before logging in.",
+          userId: user.id,
+          requiresVerification: true,
+        });
+      }
+
+      // Verify password
+      const isPasswordValid = await comparePassword(password, user.password);
+      
+      if (!isPasswordValid) {
+        return res.status(401).json({ 
+          message: "Invalid email or password" 
+        });
+      }
+
+      // Generate JWT token
+      const token = generateToken(user.id, user.email, user.role || "customer");
+
+      res.json({
+        message: "Login successful!",
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          isVerified: user.isVerified,
+        },
+      });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(500).json({ 
+        message: "Login failed. Please try again." 
+      });
+    }
+  });
+
+  /**
+   * GET /api/auth/me
+   * Get current user (protected)
+   */
+  app.get("/api/auth/me", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.user!.userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        isVerified: user.isVerified,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+
+  // ============================================
+  // EXISTING ROUTES
+  // ============================================
   
   // Get all services
   app.get("/api/services", async (req, res) => {

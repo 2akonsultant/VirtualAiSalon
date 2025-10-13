@@ -56,8 +56,31 @@ export default function Services() {
   };
 
   const handleServiceBook = (service: Service) => {
-    // Redirect to booking page instead of opening AI chat
-    setLocation("/booking");
+    console.log("🚀 Book This Service clicked for:", service.name);
+    console.log("🚀 Current URL:", window.location.href);
+    console.log("🚀 Redirecting to booking page...");
+    
+    // Try multiple methods to ensure navigation works
+    try {
+      // Method 1: Use wouter's setLocation
+      setLocation("/booking");
+      console.log("🚀 Method 1: setLocation('/booking') called");
+      
+      // Method 2: Fallback with window.location after a delay
+      setTimeout(() => {
+        if (window.location.pathname !== "/booking") {
+          console.log("🚀 Method 2: Using window.location fallback");
+          window.location.href = "/booking";
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error("🚨 Navigation error:", error);
+      console.log("🚀 Method 3: Direct window.location redirect");
+      window.location.href = "/booking";
+    }
+    
+    console.log("🚀 All navigation methods attempted");
   };
 
   if (isLoading) {
@@ -83,6 +106,30 @@ export default function Services() {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Professional beauty treatments for women and children, delivered with care and expertise to your doorstep.
             </p>
+            
+            {/* Test Navigation Button */}
+            <div className="mt-4">
+              <Button 
+                onClick={() => {
+                  console.log("🧪 Test: Direct navigation to booking");
+                  console.log("🧪 Current URL:", window.location.href);
+                  setLocation("/booking");
+                  console.log("🧪 setLocation('/booking') called");
+                  
+                  // Fallback after delay
+                  setTimeout(() => {
+                    if (window.location.pathname !== "/booking") {
+                      console.log("🧪 Test fallback: Using window.location");
+                      window.location.href = "/booking";
+                    }
+                  }, 100);
+                }}
+                variant="outline"
+                className="text-sm"
+              >
+                🧪 Test: Go to Booking Page
+              </Button>
+            </div>
           </div>
         </div>
       </section>

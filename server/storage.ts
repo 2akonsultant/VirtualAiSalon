@@ -1,4 +1,4 @@
-import { type Service, type Customer, type Booking, type AiConversation, type ContactMessage, type InsertService, type InsertCustomer, type InsertBooking, type InsertAiConversation, type InsertContactMessage } from "@shared/schema";
+import { type Service, type Customer, type Booking, type AiConversation, type ContactMessage, type User, type InsertService, type InsertCustomer, type InsertBooking, type InsertAiConversation, type InsertContactMessage, type InsertUser } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -30,6 +30,14 @@ export interface IStorage {
   getContactMessage(id: string): Promise<ContactMessage | undefined>;
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
   updateContactMessageStatus(id: string, emailSent: boolean, excelUpdated: boolean): Promise<ContactMessage | undefined>;
+  
+  // Users (Authentication)
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUserWithOTP(userData: InsertUser & { otp: string; otpExpiry: Date }): Promise<User>;
+  verifyUserOTP(userId: string): Promise<User | undefined>;
+  incrementOTPAttempts(userId: string): Promise<void>;
+  updateUserOTP(userId: string, otp: string, otpExpiry: Date): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -38,6 +46,7 @@ export class MemStorage implements IStorage {
   private bookings: Map<string, Booking> = new Map();
   private aiConversations: Map<string, AiConversation> = new Map();
   private contactMessages: Map<string, ContactMessage> = new Map();
+  private users: Map<string, User> = new Map();
 
   constructor() {
     this.initializeServices();
@@ -293,6 +302,62 @@ export class MemStorage implements IStorage {
       return message;
     }
     return undefined;
+  }
+
+  // User methods for authentication
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
+  async createUserWithOTP(userData: InsertUser & { otp: string; otpExpiry: Date }): Promise<User> {
+    const id = randomUUID();
+    const user: User = {
+      id,
+      ...userData,
+      isVerified: false,
+      otpAttempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async verifyUserOTP(userId: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.isVerified = true;
+      user.otp = null;
+      user.otpExpiry = null;
+      user.otpAttempts = 0;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      return user;
+    }
+    return undefined;
+  }
+
+  async incrementOTPAttempts(userId: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+      this.users.set(userId, user);
+    }
+  }
+
+  async updateUserOTP(userId: string, otp: string, otpExpiry: Date): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.otp = otp;
+      user.otpExpiry = otpExpiry;
+      user.otpAttempts = 0;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+    }
   }
 }
 

@@ -895,3 +895,130 @@ export async function processBooking(booking: BookingData): Promise<{ emailSent:
   }
 }
 
+/**
+ * Send OTP verification email
+ */
+export async function sendOTPEmail(
+  email: string,
+  name: string,
+  otp: string
+): Promise<boolean> {
+  try {
+    console.log(`📧 Sending OTP to: ${email}`);
+    
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
+      to: email,
+      subject: '🔐 Verify Your Email - Goodness Glamour Salon',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background: linear-gradient(135deg, #fef5f1 0%, #fef9f5 50%, #f5f3f9 100%); font-family: 'Georgia', 'Times New Roman', serif;">
+          
+          <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #fef5f1 0%, #fef9f5 50%, #f5f3f9 100%); padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                
+                <table width="620" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
+                  
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #ffeef5 0%, #fff0f3 50%, #f9f0ff 100%); padding: 50px 40px 40px 40px; text-align: center; position: relative;">
+                      <h1 style="margin: 0; color: #d4a5a5; font-size: 36px; font-weight: 300; letter-spacing: 3px; font-family: 'Georgia', serif;">
+                        Goodness Glamour
+                      </h1>
+                      <p style="margin: 8px 0 0 0; color: #b8a0a0; font-size: 15px; font-weight: 400; letter-spacing: 2px; font-family: 'Georgia', serif;">
+                        Ladies & Kids Salon
+                      </p>
+                      <div style="margin-top: 25px; padding: 10px 30px; background-color: rgba(255,255,255,0.7); border-radius: 20px; display: inline-block; border: 1px solid rgba(212,165,165,0.2);">
+                        <p style="margin: 0; color: #c9a0a0; font-size: 13px; font-weight: 500; letter-spacing: 1px;">
+                          🔐 Email Verification
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td style="padding: 40px;">
+                      
+                      <div style="background: linear-gradient(135deg, #fff5f0 0%, #fff8f5 100%); padding: 25px 30px; border-radius: 18px; margin-bottom: 30px; border: 1px solid #ffe8e0; box-shadow: 0 4px 16px rgba(255,200,180,0.1); text-align: center;">
+                        <h2 style="margin: 0 0 10px 0; color: #c88080; font-size: 24px; font-weight: 400; font-family: 'Georgia', serif;">Welcome, ${name}! 💐</h2>
+                        <p style="margin: 0; color: #d4a5a5; font-size: 16px; font-weight: 400; line-height: 1.6;">
+                          Thank you for signing up! Please verify your email address to complete your registration.
+                        </p>
+                      </div>
+                      
+                      <div style="background: linear-gradient(135deg, #f8f5ff 0%, #faf7ff 100%); padding: 40px 30px; border-radius: 18px; margin-bottom: 30px; border: 1px solid #f0e8ff; box-shadow: 0 4px 16px rgba(200,180,220,0.08); text-align: center;">
+                        <p style="margin: 0 0 20px 0; color: #a88cb8; font-size: 14px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">
+                          Your Verification Code
+                        </p>
+                        
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 14px; border: 2px solid #d4b5d4; box-shadow: 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                          <p style="margin: 0; font-size: 48px; font-weight: 700; color: #8080c0; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                            ${otp}
+                          </p>
+                        </div>
+                        
+                        <p style="margin: 0; color: #b8a0b8; font-size: 14px; line-height: 1.6;">
+                          This code will expire in <strong style="color: #8080c0;">10 minutes</strong>
+                        </p>
+                      </div>
+                      
+                      <div style="background: linear-gradient(135deg, #fff0f5 0%, #fff5f0 100%); padding: 25px 30px; border-radius: 18px; margin-bottom: 30px; border: 1px solid #ffe0e8; box-shadow: 0 4px 16px rgba(255,180,200,0.08);">
+                        <h3 style="margin: 0 0 15px 0; color: #c880a0; font-size: 16px; font-weight: 500; letter-spacing: 1px; font-family: 'Georgia', serif;">
+                          📝 How to Verify
+                        </h3>
+                        <ol style="margin: 0; padding-left: 20px; color: #b880a0; font-size: 14px; line-height: 1.8;">
+                          <li>Enter the 6-digit code on the verification page</li>
+                          <li>Click "Verify Email" button</li>
+                          <li>You'll be automatically logged in</li>
+                          <li>Start booking your favorite salon services!</li>
+                        </ol>
+                      </div>
+                      
+                      <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5faff 100%); padding: 20px 25px; border-radius: 18px; border: 1px solid #e0e8ff; box-shadow: 0 4px 16px rgba(180,200,255,0.08);">
+                        <p style="margin: 0; color: #8080c0; font-size: 13px; line-height: 1.6; text-align: center;">
+                          🔒 <strong>Security Tip:</strong> Never share this code with anyone. We'll never ask for it via phone or email.
+                        </p>
+                      </div>
+                      
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #f8f5f0 0%, #faf7f5 100%); padding: 30px 40px; text-align: center; border-top: 1px solid rgba(212,165,165,0.1);">
+                      <p style="margin: 0; color: #d4a5a5; font-size: 14px; font-weight: 400; line-height: 1.6; font-family: 'Georgia', serif;">
+                        If you didn't sign up for <strong style="color: #c88080;">Goodness Glamour Salon</strong>,<br>
+                        please ignore this email.
+                      </p>
+                      <p style="margin: 20px 0 0 0; color: #c0c0c0; font-size: 11px; letter-spacing: 0.5px;">
+                        Need help? Contact us: 9036626642 | 2akonsultant@gmail.com
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+                
+              </td>
+            </tr>
+          </table>
+          
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent successfully to ${email}`);
+    return true;
+  } catch (error: any) {
+    console.error('❌ Error sending OTP email:', error.message);
+    return false;
+  }
+}
+

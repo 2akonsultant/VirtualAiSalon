@@ -56,6 +56,25 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// Users table for authentication with OTP
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(), // Hashed password
+  name: text("name").notNull(),
+  phone: text("phone"),
+  role: text("role").default("customer"), // "customer" or "admin"
+  
+  // OTP Verification fields
+  isVerified: boolean("is_verified").default(false),
+  otp: text("otp"), // 6-digit OTP
+  otpExpiry: timestamp("otp_expiry"), // When OTP expires
+  otpAttempts: integer("otp_attempts").default(0), // Track failed attempts
+  
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 export const insertServiceSchema = createInsertSchema(services).omit({
   id: true,
   isActive: true,
@@ -91,14 +110,26 @@ export const insertContactMessageSchema = createInsertSchema(contactMessages).om
   excelUpdated: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isVerified: true,
+  otp: true,
+  otpExpiry: true,
+  otpAttempts: true,
+});
+
 export type Service = typeof services.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 export type AiConversation = typeof aiConversations.$inferSelect;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+export type User = typeof users.$inferSelect;
 
 export type InsertService = z.infer<typeof insertServiceSchema>;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 export type InsertAiConversation = z.infer<typeof insertAiConversationSchema>;
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
