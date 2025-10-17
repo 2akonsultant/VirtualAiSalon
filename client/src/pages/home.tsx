@@ -99,21 +99,27 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="pt-16 gradient-hero">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="pt-16 gradient-hero relative overflow-hidden">
+        {/* Decorative shapes in white area (subtle, on large screens only) */}
+        <span className="hidden lg:block pointer-events-none absolute right-10 top-12 w-28 h-28 rounded-full" style={{background:'rgba(212,175,55,0.12)'}}></span>
+        <span className="hidden lg:block pointer-events-none absolute right-36 top-40 w-20 h-20 rounded-lg float-slow" style={{background:'rgba(139,90,60,0.12)'}}></span>
+        <span className="hidden lg:block pointer-events-none absolute right-16 bottom-24 h-[2px] w-40 ornament-line opacity-60"></span>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+          <div className="h-[2px] w-32 ornament-line rounded-full mb-6"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
-              <h1 className="text-4xl lg:text-6xl font-serif font-bold text-foreground mb-6">
-                <span className="text-primary">Virtual Salon</span> at Your Doorstep
+              <h1 className="text-4xl lg:text-6xl font-serif font-bold mb-6 leading-tight">
+                <span className="block text-[#7F6363]">Virtual Salon <span className="text-[#C8AAAA]">at</span></span>
+                <span className="block text-[#C8AAAA]">Your Doorstep</span>
               </h1>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-lg text-black mb-8 leading-relaxed">
                 Goodness Glamour brings professional hair services directly to your home. 
                 Our virtual salon specializes in premium hair treatments for women and kids, 
                 delivered with care and expertise to your doorstep.
               </p>
               
               {/* QR Code Section */}
-              <Card className="p-8 mb-8 bg-card/80 backdrop-blur-sm" data-testid="qr-scan-section">
+              <Card className="p-8 mb-8 bg-[#fafafa] border border-[#d4af37]/40 shadow-xl transition-transform duration-300 hover:scale-[1.02] hover:shadow-2xl" data-testid="qr-scan-section">
                 <div className="flex items-center justify-center mb-6">
                   <div className="w-48 h-48 bg-white border-2 border-primary/20 rounded-2xl flex items-center justify-center shadow-xl p-4">
                     <img 
@@ -123,8 +129,8 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                <h3 className="text-xl font-serif font-semibold mb-3 text-center">Scan to Visit Our Website</h3>
-                <p className="text-muted-foreground text-sm text-center leading-relaxed">
+                <h3 className="text-xl font-serif font-semibold mb-3 text-center text-[#2c1810]">Scan to Visit Our Website</h3>
+                <p className="text-black text-sm text-center leading-relaxed">
                   Scan this QR code with your phone camera to instantly open our website and explore all services
                 </p>
               </Card>
@@ -151,26 +157,39 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative group overflow-hidden rounded-2xl shadow-2xl ring-1 ring-[#d4af37]/40">
               <img 
-                src="https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                src="/salon-hero.png" 
                 alt="Professional hair styling service" 
-                className="rounded-xl shadow-2xl w-full h-auto"
+                className="w-full h-[560px] lg:h-[620px] object-cover transition-transform duration-700 ease-out group-hover:scale-105 group-hover:-translate-y-1 z-0"
                 data-testid="hero-image"
               />
+              {/* Subtle decorative shapes */}
+              <span className="hidden lg:block absolute -right-6 top-12 w-24 h-24 rounded-full" style={{background:'rgba(212,175,55,0.12)'}}></span>
+              <span className="hidden lg:block absolute right-12 bottom-10 w-16 h-16 rounded-lg float-slow" style={{background:'rgba(139,90,60,0.12)'}}></span>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/0 via-black/0 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0" />
               
-              <Badge className="floating-badge -top-6 -right-6 bg-primary text-primary-foreground" data-testid="badge-rating">
-                <Star className="h-5 w-5 mr-2" />
-                5★ Rated
-              </Badge>
+              <div className="absolute top-5 right-5 z-20">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-black shadow-xl shadow-amber-500/25 ring-1 ring-amber-300/60">
+                  <Star className="h-4 w-4 text-yellow-700 fill-yellow-400" />
+                  <span className="text-xs font-semibold tracking-wide">5★ Top Rated</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Services */}
-      <section className="py-16 bg-background" data-testid="featured-services">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8] relative overflow-hidden" data-testid="featured-services">
+        {/* Decorative shapes for subtle motion on empty sides */}
+        {/* Diamond + square + thin line (replaces circle-only look) */}
+        <span className="hidden lg:block pointer-events-none absolute left-10 top-16 w-24 h-24 transform rotate-45 border float-slow" style={{borderColor:'rgba(212,175,55,0.25)', background:'rgba(212,175,55,0.06)'}}></span>
+        <span className="hidden lg:block pointer-events-none absolute left-32 bottom-12 w-16 h-16 rounded-lg float-slow" style={{background:'rgba(139,90,60,0.10)'}}></span>
+        <span className="hidden lg:block pointer-events-none absolute right-12 top-12 w-24 h-[2px] ornament-line opacity-70"></span>
+        <span className="hidden lg:block pointer-events-none absolute right-32 bottom-16 h-[2px] w-40 ornament-line opacity-60"></span>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-[1px] w-24 ornament-line rounded-full mx-auto mb-8 opacity-70"></div>
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
               Our Premium Hair Services
@@ -205,13 +224,13 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 bg-secondary/30" data-testid="how-it-works">
+      <section id="how-it-works" className="py-16 bg-gradient-to-br from-[#ffffff] via-[#fafafa] to-[#f7f4ec]" data-testid="how-it-works">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-[#2c1810] mb-4">
               How It Works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto">
               Simple steps to book your premium doorstep beauty service
             </p>
           </div>
@@ -253,11 +272,11 @@ export default function Home() {
                 className="text-center group cursor-pointer block hover:scale-105 transition-transform"
                 data-testid={`step-${index + 1}`}
               >
-                <div className={`w-20 h-20 ${step.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}>
-                  <step.icon className="text-white text-2xl h-8 w-8" />
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`} style={{background:'#3d1f1f'}}>
+                  <step.icon className="text-2xl h-8 w-8" style={{color:'#e8c547'}} />
                 </div>
-                <h3 className="text-xl font-serif font-semibold mb-4 group-hover:text-primary transition-colors">{step.title}</h3>
-                <p className="text-muted-foreground group-hover:text-foreground transition-colors">{step.description}</p>
+                <h3 className="text-xl font-serif font-semibold mb-4 transition-colors text-[#2c1810] group-hover:text-[#a0522d]">{step.title}</h3>
+                <p className="text-[#666666]">{step.description}</p>
               </a>
             ))}
           </div>
@@ -265,14 +284,14 @@ export default function Home() {
       </section>
 
       {/* AI Assistant Showcase */}
-      <section className="py-16 bg-background" data-testid="ai-showcase">
+      <section className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8]" data-testid="ai-showcase">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-6">
+              <h2 className="text-3xl lg:text-4xl font-serif font-bold text-[#2c1810] mb-6">
                 Meet Your Personal Beauty Assistant
               </h2>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-lg text-[#666666] mb-8 leading-relaxed">
                 Our AI-powered assistant is available 24/7 to help you choose the perfect services, 
                 answer questions, and book appointments. Experience personalized beauty consultations 
                 through voice or chat.
@@ -299,7 +318,7 @@ export default function Home() {
                 className="btn-accent flex items-center"
                 data-testid="button-try-ai-assistant"
               >
-                <Bot className="h-4 w-4 mr-2" />
+                <Bot className="h-4 w-4 mr-2 text-white" />
                 Try AI Assistant
               </Button>
             </div>
@@ -308,11 +327,11 @@ export default function Home() {
             <Card className="shadow-lg" data-testid="ai-chat-demo">
               <div className="bg-primary text-primary-foreground p-4 flex items-center rounded-t-xl">
                 <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center mr-3">
-                  <Bot className="text-primary-foreground text-sm h-4 w-4" />
+                  <Bot className="text-white text-sm h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Beauty Assistant</h4>
-                  <p className="text-xs opacity-80">Online now</p>
+                  <h4 className="font-medium text-white">Beauty Assistant</h4>
+                  <p className="text-xs text-white opacity-80">Online now</p>
                 </div>
               </div>
               
@@ -331,7 +350,7 @@ export default function Home() {
                   >
                     {chat.role === "ai" && (
                       <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                        <Bot className="text-primary-foreground text-xs h-4 w-4" />
+                        <Bot className="text-white text-xs h-4 w-4" />
                       </div>
                     )}
                     
@@ -350,7 +369,7 @@ export default function Home() {
                 <div className="flex items-center space-x-2">
                   <Input placeholder="Type your message..." className="flex-1" disabled />
                   <Button size="icon" disabled className="btn-primary">
-                    <Bot className="h-4 w-4" />
+                    <Bot className="h-4 w-4 text-white" />
                   </Button>
                 </div>
               </div>
@@ -360,7 +379,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-secondary/30" data-testid="testimonials">
+      <section className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8]" data-testid="testimonials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
@@ -394,9 +413,9 @@ export default function Home() {
             ].map((testimonial, index) => (
               <Card key={index} className="p-6 hover:shadow-lg transition-shadow" data-testid={`testimonial-${index}`}>
                 <div className="flex items-center mb-4">
-                  <div className="flex text-accent">
+                  <div className="flex text-yellow-500">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current" />
+                      <Star key={i} className="h-4 w-4 fill-current text-yellow-500 drop-shadow-sm" />
                     ))}
                   </div>
                 </div>
@@ -421,13 +440,13 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 bg-background" data-testid="contact">
+      <section id="contact" className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8]" data-testid="contact">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-[#2c1810] mb-4">
               Get in Touch
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto">
               Ready to experience premium doorstep beauty services? Contact us today!
             </p>
           </div>
@@ -435,29 +454,29 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Information */}
             <div>
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {[
                   { icon: Phone, title: "Phone", info: "9036626642" },
                   { icon: Clock, title: "Service Hours", info: "Mon - Sun: 9:00 AM - 8:00 PM" },
                   { icon: MapPin, title: "Service Area", info: "We serve across the city with doorstep services" },
                   { icon: Bot, title: "AI Assistant", info: "Available 24/7 for instant booking and queries" }
                 ].map((contact, index) => (
-                  <div key={index} className="flex items-center" data-testid={`contact-info-${index}`}>
-                    <div className={`w-12 h-12 ${index % 2 === 0 ? 'bg-primary' : 'bg-accent'} rounded-full flex items-center justify-center mr-4`}>
-                      <contact.icon className="text-white h-5 w-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{contact.title}</h4>
-                      <p className="text-muted-foreground">{contact.info}</p>
-                    </div>
+                <div key={index} className="flex items-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-sm" data-testid={`contact-info-${index}`}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 shadow-sm transition-transform duration-300 ease-out hover:scale-105" style={{background:'#3d1f1f'}}>
+                    <contact.icon className="h-5 w-5" style={{color:'#e8c547'}} />
                   </div>
+                  <div>
+                    <h4 className="font-semibold uppercase tracking-wide text-[#2c2c2c]">{contact.title}</h4>
+                    <p className="text-[#666666]">{contact.info}</p>
+                  </div>
+                </div>
                 ))}
               </div>
 
               <div className="mt-8 space-y-4">
                 <Button 
                   onClick={() => setLocation("/booking")}
-                  className="w-full btn-primary flex items-center justify-center"
+                  className="w-full flex items-center justify-center rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out bg-[#d4af37] text-[#2c1810] hover:bg-[#b8860b]"
                   data-testid="button-book-appointment-contact"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
@@ -465,15 +484,15 @@ export default function Home() {
                 </Button>
                 <Button 
                   onClick={() => setShowAIChat(true)}
-                  className="w-full btn-accent flex items-center justify-center"
+                  className="w-full flex items-center justify-center rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out bg-[#8b5a3c] text-white hover:bg-[#a0522d]"
                   data-testid="button-chat-ai-contact"
                 >
-                  <Bot className="h-4 w-4 mr-2" />
+                  <Bot className="h-4 w-4 mr-2 text-white" />
                   Chat with AI Assistant
                 </Button>
                 <Button 
                   asChild
-                  className="w-full btn-secondary flex items-center justify-center"
+                  className="w-full flex items-center justify-center rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out bg-[#3d1f1f] text-[#f8f6f0] hover:bg-[#4d2525]"
                   data-testid="button-call-contact"
                 >
                   <a href="tel:9036626642">
@@ -485,40 +504,42 @@ export default function Home() {
             </div>
 
             {/* Contact Form */}
-            <Card className="p-8" data-testid="contact-form">
-              <h3 className="text-2xl font-serif font-semibold mb-6">Send us a Message</h3>
+            <Card className="p-8 bg-[#f5f5f5] border border-gray-100 shadow-xl card-animate" data-testid="contact-form">
+              <h3 className="text-2xl font-serif font-semibold mb-6 text-[#2c1810]">Send us a Message</h3>
               <form onSubmit={handleContactSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Name *</label>
+                    <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Name *</label>
                     <Input 
                       placeholder="Your name" 
                       value={contactForm.name}
                       onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
                       data-testid="input-contact-name"
+                      className="bg-[#fafafa] placeholder:text-[#999999] focus:border-[#d4af37] focus:ring-[#d4af37]/40"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Phone *</label>
+                    <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Phone *</label>
                     <Input 
                       type="tel" 
                       placeholder="Your phone number" 
                       value={contactForm.phone}
                       onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
                       data-testid="input-contact-phone"
+                      className="bg-[#fafafa] placeholder:text-[#999999] focus:border-[#d4af37] focus:ring-[#d4af37]/40"
                       required
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Service Interest *</label>
+                  <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Service Interest *</label>
                   <Select 
                     value={contactForm.serviceInterest}
                     onValueChange={(value) => setContactForm({...contactForm, serviceInterest: value})}
                   >
-                    <SelectTrigger data-testid="select-service-interest">
+                    <SelectTrigger data-testid="select-service-interest" className="bg-[#fafafa] focus:border-[#d4af37] focus:ring-[#d4af37]/40">
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                     <SelectContent>
@@ -533,10 +554,10 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Address *</label>
+                  <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Address *</label>
                   <Textarea 
                     placeholder="Your full address for doorstep service" 
-                    className="h-24"
+                    className="h-24 bg-[#fafafa] placeholder:text-[#999999] focus:border-[#d4af37] focus:ring-[#d4af37]/40"
                     value={contactForm.address}
                     onChange={(e) => setContactForm({...contactForm, address: e.target.value})}
                     data-testid="textarea-contact-address"
@@ -545,10 +566,10 @@ export default function Home() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Message (Optional)</label>
+                  <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Message (Optional)</label>
                   <Textarea 
                     placeholder="Tell us about your requirements" 
-                    className="h-24"
+                    className="h-24 bg-[#fafafa] placeholder:text-[#999999] focus:border-[#d4af37] focus:ring-[#d4af37]/40"
                     value={contactForm.message}
                     onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
                     data-testid="textarea-contact-message"
@@ -557,7 +578,7 @@ export default function Home() {
                 
                 <Button 
                   type="submit" 
-                  className="w-full btn-accent"
+                  className="w-full bg-[#3d1f1f] hover:bg-[#4d2525] text-[#f8f6f0] rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out"
                   disabled={contactMutation.isPending}
                   data-testid="button-send-message"
                 >
@@ -570,59 +591,60 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-12" data-testid="footer">
+      <footer className="py-16 bg-[#2c1810]/90 backdrop-blur-sm text-[#f8f6f0] border-t border-[#d4af37]/30" data-testid="footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="h-[1px] w-full ornament-line rounded-full mb-10 opacity-70"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
-              <h3 className="text-xl font-serif font-semibold mb-4">Goodness Glamour</h3>
-              <p className="text-background/80 mb-4">
+              <h3 className="text-3xl font-serif font-semibold mb-4 text-[#b8b8b8]">Goodness Glamour</h3>
+              <p className="mb-6 text-white leading-relaxed">
                 Premium doorstep beauty services for women and kids. 
                 Experience luxury salon treatments in the comfort of your home.
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-background/80">
-                <li>Hair Cut & Styling</li>
-                <li>Hair Coloring</li>
-                <li>Hair Spa & Treatment</li>
-                <li>Bridal Styling</li>
-                <li>Kids Hair Services</li>
-                <li>Home Consultation</li>
+              <h4 className="font-semibold tracking-wide uppercase text-[#d4af37] mb-4">Services</h4>
+              <ul className="space-y-3 text-white">
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Hair Cut & Styling</li>
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Hair Coloring</li>
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Hair Spa & Treatment</li>
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Bridal Styling</li>
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Kids Hair Services</li>
+                <li className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Home Consultation</li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-background/80">
-                <li><a href="/services" className="hover:text-background">Our Services</a></li>
-                <li><a href="#how-it-works" className="hover:text-background">How It Works</a></li>
-                <li><a href="#contact" className="hover:text-background">Contact Us</a></li>
-                <li><a href="/booking" className="hover:text-background">Book Now</a></li>
+              <h4 className="font-semibold tracking-wide uppercase text-[#d4af37] mb-4">Quick Links</h4>
+              <ul className="space-y-3 text-white">
+                <li><a href="/services" className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Our Services</a></li>
+                <li><a href="#how-it-works" className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">How It Works</a></li>
+                <li><a href="#contact" className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Contact Us</a></li>
+                <li><a href="/booking" className="transition-all duration-300 hover:text-[#d4af37] hover:translate-x-1">Book Now</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-background/80">
-                <li className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2" />
-                  9036626642
+              <h4 className="font-semibold tracking-wide uppercase text-[#d4af37] mb-4">Contact</h4>
+              <ul className="space-y-3 text-white">
+                <li className="flex items-center transition-all duration-300 hover:translate-x-1">
+                  <Phone className="h-4 w-4 mr-2" style={{color:'#d4af37'}} />
+                  <a href="tel:9036626642" className="hover:text-[#d4af37]">9036626642</a>
                 </li>
-                <li className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2" />
+                <li className="flex items-center transition-all duration-300 hover:translate-x-1">
+                  <Clock className="h-4 w-4 mr-2" style={{color:'#d4af37'}} />
                   9 AM - 8 PM Daily
                 </li>
-                <li className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
+                <li className="flex items-center transition-all duration-300 hover:translate-x-1">
+                  <MapPin className="h-4 w-4 mr-2" style={{color:'#d4af37'}} />
                   Citywide Service
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-background/20 mt-8 pt-8 text-center text-background/60">
+          <div className="mt-12 pt-6 text-center border-t border-[#c9a869]/20 text-[#b8b8b8] text-sm">
             <p>&copy; 2024 Goodness Glamour Ladies & Kids Salon. All rights reserved.</p>
             <p className="mt-2">Powered by AI-driven booking technology</p>
           </div>
@@ -632,10 +654,10 @@ export default function Home() {
       {/* Floating AI Chat Button */}
       <Button
         onClick={() => setShowAIChat(true)}
-        className="fixed bottom-6 right-6 z-40 bg-accent text-accent-foreground w-16 h-16 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center"
+        className="ai-chat-button bg-accent text-accent-foreground w-16 h-16 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center"
         data-testid="button-floating-ai-chat"
       >
-        <Bot className="h-6 w-6" />
+        <Bot className="h-6 w-6 text-white" />
       </Button>
 
       {/* AI Chat Modal */}

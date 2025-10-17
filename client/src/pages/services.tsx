@@ -71,15 +71,15 @@ export default function Services() {
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-background">
+    <div className="min-h-screen pt-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8]">
       {/* Header */}
       <section className="py-12 gradient-hero" data-testid="services-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-5xl font-serif font-bold text-foreground mb-4">
+            <h1 className="text-4xl lg:text-5xl font-serif font-bold text-[#2c1810] mb-4">
               Our Premium Services
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto">
               Professional beauty treatments for women and children, delivered with care and expertise to your doorstep.
             </p>
             
@@ -88,7 +88,7 @@ export default function Services() {
       </section>
 
       {/* Filters and Search */}
-      <section className="py-8 bg-background sticky top-16 z-30 border-b border-border" data-testid="services-filters">
+      <section className="py-8 sticky top-16 z-30 border-b border-[#d4d4d4] bg-white/70 backdrop-blur" data-testid="services-filters">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
@@ -98,7 +98,7 @@ export default function Services() {
                 placeholder="Search services..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-[#fafafa] placeholder:text-[#999999] focus:border-[#d4af37] focus:ring-[#d4af37]/40"
                 data-testid="input-search-services"
               />
             </div>
@@ -110,7 +110,7 @@ export default function Services() {
                   key={category.value}
                   variant={selectedCategory === category.value ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category.value)}
-                  className={selectedCategory === category.value ? "btn-primary" : ""}
+                  className={selectedCategory === category.value ? "btn-primary" : "border-[#d4af37] text-[#8b5a3c] bg-[#fff8dc]"}
                   data-testid={`button-category-${category.value}`}
                 >
                   {category.label}
@@ -141,7 +141,7 @@ export default function Services() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-12 bg-background" data-testid="services-grid">
+      <section className="py-12" data-testid="services-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {filteredServices.length === 0 ? (
             <div className="text-center py-12" data-testid="no-services-found">
@@ -239,7 +239,7 @@ export default function Services() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-secondary/30" data-testid="services-cta">
+      <section className="py-16 bg-gradient-to-br from-white via-blue-50 to-blue-100" data-testid="services-cta">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-serif font-bold text-foreground mb-4">
             Need Help Choosing the Right Service?

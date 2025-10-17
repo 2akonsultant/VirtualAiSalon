@@ -16,6 +16,7 @@ export interface IStorage {
   // Bookings
   getBooking(id: string): Promise<Booking | undefined>;
   getBookingsByCustomer(customerId: string): Promise<Booking[]>;
+  getBookingsByUser(userId: string): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBookingStatus(id: string, status: string): Promise<Booking | undefined>;
   
@@ -50,6 +51,33 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.initializeServices();
+  }
+
+  async initializeAdminUser() {
+    // Check if admin user already exists
+    const existingAdmin = await this.getUserByEmail("admin@goodnessglamour.com");
+    if (existingAdmin) {
+      return;
+    }
+
+    // Create default admin user
+    const adminUser: User = {
+      id: "admin-user-001",
+      email: "admin@goodnessglamour.com",
+      password: "$2b$10$tB9vRCweJPklU7eRtyoDTeLEs1cRu/bdkpd.VcqyfyIb5p5rUlDfG", // "admin123" hashed
+      name: "Admin User",
+      phone: "9036626642",
+      role: "admin",
+      isVerified: true,
+      otp: null,
+      otpExpiry: null,
+      otpAttempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.users.set(adminUser.id, adminUser);
+    console.log("✅ Default admin user created: admin@goodnessglamour.com / admin123");
   }
 
   private initializeServices() {
@@ -213,6 +241,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.bookings.values()).filter(b => b.customerId === customerId);
   }
 
+  async getBookingsByUser(userId: string): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).filter(b => b.userId === userId);
+  }
+
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const id = randomUUID();
     const booking: Booking = { 
@@ -364,3 +396,6 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+
+// Initialize admin user after storage is created
+storage.initializeAdminUser().catch(console.error);

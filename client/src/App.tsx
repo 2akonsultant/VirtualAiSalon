@@ -12,9 +12,13 @@ import Dashboard from "@/pages/dashboard";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import VerifyOTP from "@/pages/verify-otp";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
+import MyBookings from "@/pages/my-bookings";
 import NotFound from "@/pages/not-found";
 import Navigation from "@/components/navigation";
 import AuthGuard from "@/components/auth-guard";
+import WhatsAppChat from "@/components/whatsapp-chat";
 
 function Router() {
   return (
@@ -24,6 +28,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
         <Route path="/verify-otp" component={VerifyOTP} />
+        <Route path="/admin-login" component={AdminLogin} />
         
         {/* Protected routes - require authentication */}
         <Route path="/">
@@ -68,6 +73,18 @@ function Router() {
             <Dashboard />
           </AuthGuard>
         </Route>
+        <Route path="/admin-dashboard">
+          <AuthGuard>
+            <Navigation />
+            <AdminDashboard />
+          </AuthGuard>
+        </Route>
+        <Route path="/my-bookings">
+          <AuthGuard>
+            <Navigation />
+            <MyBookings />
+          </AuthGuard>
+        </Route>
         <Route path="/ai-chat">
           <AuthGuard>
             <Navigation />
@@ -89,6 +106,10 @@ function App() {
         <div className="min-h-screen bg-background">
           <Router />
           <Toaster />
+          <WhatsAppChat 
+            phoneNumber="9424309363"
+            message="How can I help you?"
+          />
         </div>
       </TooltipProvider>
     </QueryClientProvider>

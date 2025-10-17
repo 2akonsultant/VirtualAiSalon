@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import XLSX from 'xlsx';
 import * as fs from 'fs';
 import * as path from 'path';
+import { sendBookingConfirmationSMS } from './sms-service';
 
 export interface ContactMessage {
   name: string;
@@ -868,8 +869,14 @@ export async function testEmailConfiguration(): Promise<boolean> {
   }
 }
 
-// Process booking (save to Excel and send emails)
-export async function processBooking(booking: BookingData): Promise<{ emailSent: boolean; excelUpdated: boolean; customerEmailSent: boolean }> {
+// Process booking (save to Excel, send emails, and send SMS)
+export async function processBooking(booking: BookingData): Promise<{ 
+  emailSent: boolean; 
+  excelUpdated: boolean; 
+  customerEmailSent: boolean;
+  smsSent: boolean;
+  smsProvider?: string;
+}> {
   try {
     console.log(`📧 Processing booking from: ${booking.customerName}`);
     
@@ -884,14 +891,39 @@ export async function processBooking(booking: BookingData): Promise<{ emailSent:
     const customerEmailSent = await sendCustomerBookingConfirmation(booking);
     console.log(`📧 Customer email result: ${customerEmailSent}`);
     
+    // Send SMS confirmation to customer
+    console.log(`📱 Attempting to send SMS to: ${booking.customerPhone}`);
+    const smsResult = await sendBookingConfirmationSMS({
+      id: booking.id,
+      customerName: booking.customerName,
+      customerPhone: booking.customerPhone,
+      appointmentDate: booking.appointmentDate,
+      appointmentTime: booking.appointmentTime,
+      services: booking.services,
+      totalAmount: booking.totalAmount,
+      customerAddress: booking.customerAddress
+    });
+    console.log(`📱 SMS result: ${smsResult.success} via ${smsResult.provider}`);
+    
     const emailSent = adminEmailSent; // Keep existing return format for compatibility
     
-    console.log(`✅ Booking processed: Admin Email=${adminEmailSent}, Customer Email=${customerEmailSent}, Excel=${excelUpdated}`);
+    console.log(`✅ Booking processed: Admin Email=${adminEmailSent}, Customer Email=${customerEmailSent}, SMS=${smsResult.success} (${smsResult.provider}), Excel=${excelUpdated}`);
     
-    return { emailSent, excelUpdated, customerEmailSent };
+    return { 
+      emailSent, 
+      excelUpdated, 
+      customerEmailSent,
+      smsSent: smsResult.success,
+      smsProvider: smsResult.provider
+    };
   } catch (error) {
     console.error('❌ Error processing booking:', error);
-    return { emailSent: false, excelUpdated: false, customerEmailSent: false };
+    return { 
+      emailSent: false, 
+      excelUpdated: false, 
+      customerEmailSent: false,
+      smsSent: false
+    };
   }
 }
 

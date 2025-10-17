@@ -8,6 +8,7 @@ import { processContactMessage, processBooking, sendOTPEmail } from "./email-ser
 import { chatWithGemini, resetChatSession, testGeminiConnection } from "./gemini-service";
 import { hashPassword, comparePassword, generateToken } from "./auth-service";
 import { generateOTP, getOTPExpiry, isOTPExpired, isValidOTPFormat, isTooManyAttempts } from "./otp-service";
+import { processDashboardData } from "./utils/dashboard-analytics";
 import { requireAuth, requireAdmin } from "./middleware/auth-middleware";
 import { 
   readBookingsExcel, 
@@ -18,6 +19,7 @@ import {
   calculateAverageValue,
   getBookingTrends 
 } from "./dashboard-service";
+import { googleAuth, logout } from "./google-auth";
 
 // Log API key for debugging (first 10 chars only for security)
 const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key";
@@ -103,6 +105,35 @@ function generateFallbackResponse(message: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Simple in-memory SSE clients registry
+  const sseClients: Set<any> = new Set();
+
+  function sendSseEvent(event: { type: string; payload?: any }) {
+    const data = `data: ${JSON.stringify(event)}\n\n`;
+    for (const res of sseClients) {
+      try {
+        res.write(data);
+      } catch (_) {
+        // Ignore broken pipes
+      }
+    }
+  }
+
+  // Server-Sent Events endpoint for realtime dashboard updates
+  app.get("/api/events", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+
+    // Initial ping to keep connection alive
+    res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+
+    sseClients.add(res);
+    req.on("close", () => {
+      sseClients.delete(res);
+    });
+  });
   
   // ============================================
   // AUTHENTICATION ROUTES WITH OTP
@@ -446,6 +477,365 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Expose selected runtime config to the client (used when serving UI from port 5000)
+  app.get("/config.js", (req, res) => {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+    const payload = `window.__GOOGLE_CLIENT_ID__ = '${googleClientId.replace(/'/g, "\\'")}';`;
+    res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+    res.send(payload);
+  });
+
+  /**
+   * POST /api/auth/google
+   * Google OAuth authentication
+   */
+  app.post("/api/auth/google", async (req, res) => {
+    try {
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Google token is required' 
+        });
+      }
+
+      // Import Google OAuth verification
+      const { OAuth2Client } = require('google-auth-library');
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+      // Verify Google token
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      
+      const payload = ticket.getPayload();
+      
+      if (!payload.email_verified) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Google email not verified' 
+        });
+      }
+
+      // Check if user exists in database
+      let user = await storage.getUserByEmail(payload.email);
+
+      if (!user) {
+        // Create new user with Google credentials
+        const newUser = {
+          name: payload.name,
+          email: payload.email,
+          googleId: payload.sub,
+          profilePicture: payload.picture,
+          isVerified: true,
+          provider: 'google',
+          createdAt: new Date().toISOString()
+        };
+
+        user = await storage.createUser(newUser);
+        console.log('New user created via Google OAuth:', user.email);
+      } else {
+        // Update existing user with Google ID if not already set
+        if (!user.googleId) {
+          await storage.updateUser(user.id, {
+            googleId: payload.sub,
+            profilePicture: payload.picture,
+            provider: 'google'
+          });
+        }
+      }
+
+      // Generate JWT token
+      const jwtToken = generateToken(user);
+
+      // Return success response
+      res.json({
+        success: true,
+        message: 'Google authentication successful',
+        token: jwtToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          isVerified: user.isVerified
+        }
+      });
+
+    } catch (error) {
+      console.error('Google auth error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Google authentication failed',
+        error: error.message 
+      });
+    }
+  });
+
+  /**
+   * POST /api/auth/logout
+   * Logout endpoint
+   */
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Logout failed' 
+      });
+    }
+  });
+
+  // ============================================
+  // USER-SPECIFIC ROUTES
+  // ============================================
+
+  /**
+   * GET /api/user/bookings
+   * Get current user's bookings (protected)
+   */
+  app.get("/api/user/bookings", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.userId;
+      
+      // Fetch user's bookings from database
+      const bookings = await storage.getBookingsByUser(userId);
+      
+      // Transform bookings to include service names and user-friendly format
+      const transformedBookings = await Promise.all(
+        bookings.map(async (booking) => {
+          const serviceNames: string[] = [];
+          const serviceIds = booking.serviceIds as string[];
+          
+          for (const serviceId of serviceIds) {
+            const service = await storage.getService(serviceId);
+            if (service) {
+              serviceNames.push(service.name);
+            }
+          }
+          
+          return {
+            id: booking.id,
+            services: serviceNames.join(", "),
+            appointmentDate: booking.appointmentDate.toISOString(),
+            status: booking.status,
+            totalAmount: booking.totalAmount,
+            notes: booking.notes,
+            location: "Your Home"
+          };
+        })
+      );
+
+      res.json(transformedBookings);
+    } catch (error) {
+      console.error("Error fetching user bookings:", error);
+      res.status(500).json({ message: "Failed to fetch user bookings" });
+    }
+  });
+
+  /**
+   * POST /api/user/bookings
+   * Create booking for authenticated user (protected)
+   */
+  app.post("/api/user/bookings", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.userId;
+      const { serviceIds, appointmentDate, notes } = req.body;
+      
+      // Validate required fields
+      if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
+        return res.status(400).json({ message: "At least one service must be selected" });
+      }
+      
+      if (!appointmentDate) {
+        return res.status(400).json({ message: "Appointment date is required" });
+      }
+      
+      // Calculate total amount and validate services
+      let totalAmount = 0;
+      const serviceNames: string[] = [];
+      
+      for (const serviceId of serviceIds) {
+        const service = await storage.getService(serviceId);
+        if (!service) {
+          return res.status(400).json({ message: `Service with ID ${serviceId} not found` });
+        }
+        if (!service.isActive) {
+          return res.status(400).json({ message: `Service ${service.name} is not available` });
+        }
+        totalAmount += service.priceMin; // Use minimum price for calculation
+        serviceNames.push(service.name);
+      }
+      
+      // Create booking linked to user
+      const booking = await storage.createBooking({
+        userId,
+        serviceIds,
+        appointmentDate: new Date(appointmentDate),
+        totalAmount,
+        notes: notes || null,
+      });
+      
+      console.log(`📅 User booking created - User: ${userId}, Services: ${serviceNames.join(", ")}, Amount: ₹${totalAmount}`);
+
+      // Best-effort: update Excel + send emails for admin/customer
+      try {
+        const user = await storage.getUser(userId);
+        await processBooking({
+          id: booking.id,
+          customerName: user?.name || "Customer",
+          customerEmail: user?.email || "",
+          customerPhone: user?.phone || "",
+          customerAddress: "",
+          appointmentDate: new Date(appointmentDate).toISOString(),
+          appointmentTime: new Date(appointmentDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }),
+          services: serviceNames,
+          totalAmount: totalAmount,
+          notes: notes || "",
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error("❌ Error processing booking post-create:", e);
+      }
+
+      // Notify dashboards in real-time
+      sendSseEvent({ type: "booking_created", payload: { id: booking.id } });
+      
+      res.status(201).json({
+        id: booking.id,
+        services: serviceNames.join(", "),
+        appointmentDate: booking.appointmentDate.toISOString(),
+        status: booking.status,
+        totalAmount: booking.totalAmount,
+        notes: booking.notes,
+        location: "Your Home"
+      });
+    } catch (error) {
+      console.error("Error creating user booking:", error);
+      res.status(500).json({ message: "Failed to create booking" });
+    }
+  });
+
+  /**
+   * GET /api/admin/dashboard/analytics
+   * Get comprehensive dashboard analytics (admin only)
+   */
+  app.get("/api/admin/dashboard/analytics", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { timeRange = "all" } = req.query;
+      
+      console.log(`📊 Fetching dashboard analytics for timeRange: ${timeRange}`);
+      
+      const analytics = await processDashboardData(timeRange as string);
+      
+      console.log(`✅ Dashboard analytics generated successfully`);
+      
+      // Add cache-busting headers
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching dashboard analytics:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard analytics" });
+    }
+  });
+
+  // ============================================
+  // ADMIN-SPECIFIC ROUTES
+  // ============================================
+
+  /**
+   * GET /api/admin/services
+   * Get all services (admin only)
+   */
+  app.get("/api/admin/services", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const services = await storage.getServices();
+      res.json(services);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch services" });
+    }
+  });
+
+  /**
+   * POST /api/admin/services
+   * Create new service (admin only)
+   */
+  app.post("/api/admin/services", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const serviceData = req.body;
+      
+      // Validate required fields
+      if (!serviceData.name || !serviceData.description || !serviceData.category) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const newService = await storage.createService(serviceData);
+      res.status(201).json(newService);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create service" });
+    }
+  });
+
+  /**
+   * PUT /api/admin/services/:id
+   * Update service (admin only)
+   */
+  app.put("/api/admin/services/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      // Check if service exists
+      const existingService = await storage.getService(id);
+      if (!existingService) {
+        return res.status(404).json({ message: "Service not found" });
+      }
+
+      // Update service - you'll need to implement updateService in storage
+      const updatedService = { ...existingService, ...updateData };
+      
+      // For now, return the updated service
+      // In real implementation, you'd call storage.updateService(id, updateData)
+      res.json(updatedService);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update service" });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/services/:id
+   * Delete service (admin only)
+   */
+  app.delete("/api/admin/services/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check if service exists
+      const existingService = await storage.getService(id);
+      if (!existingService) {
+        return res.status(404).json({ message: "Service not found" });
+      }
+
+      // For now, return success
+      // In real implementation, you'd call storage.deleteService(id)
+      res.json({ message: "Service deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete service" });
+    }
+  });
+
   // ============================================
   // EXISTING ROUTES
   // ============================================
@@ -774,6 +1164,8 @@ Remember: You're helping someone feel pampered and excited about their salon exp
         timestamp: new Date().toISOString()
       }).then(({ emailSent, excelUpdated }) => {
         console.log(`✅ Contact message processed: Email=${emailSent}, Excel=${excelUpdated}`);
+        // Notify dashboards in real-time
+        sendSseEvent({ type: "message_created", payload: { id: contactMessage.id } });
       }).catch(err => {
         console.error('❌ Error processing contact message:', err);
       });

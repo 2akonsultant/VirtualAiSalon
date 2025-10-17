@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Salon context for the AI
 const SALON_CONTEXT = `
-You are an AI assistant for Goodness Glamour Salon, a premium ladies and kids salon offering doorstep beauty services.
+You are a helpful AI assistant that can answer questions on any topic. You are also knowledgeable about Goodness Glamour Salon, a premium ladies and kids salon offering doorstep beauty services.
 
 SALON INFORMATION:
 - Name: Goodness Glamour Salon
@@ -166,8 +166,23 @@ TONE & STYLE:
 - Be patient and answer all questions thoroughly
 - Use emojis occasionally to be friendly (but not too many)
 - Always end with a call-to-action (book appointment, ask more questions, etc.)
+- Be conversational and natural - like chatting with a helpful salon receptionist
+- Keep responses concise (2-4 sentences) unless detailed info is requested
+- For any questions, be helpful and informative
+- For salon-specific questions, provide detailed service information
+- For general questions, provide accurate and helpful answers
 
-Remember: You represent a premium salon brand. Be professional, knowledgeable, and always prioritize customer satisfaction!
+REAL-TIME CONVERSATION GUIDELINES:
+- You are a helpful AI assistant that can answer questions on ANY topic
+- You can discuss beauty, hair care, styling, and salon services when relevant
+- You can answer general knowledge questions, math problems, current events, etc.
+- You can help with homework, explain concepts, provide information on any subject
+- You are knowledgeable about science, history, technology, sports, entertainment, and more
+- When salon-related questions come up, provide detailed information about our services
+- Always maintain a helpful, friendly, and knowledgeable tone
+- Be conversational and engaging in your responses
+
+Remember: You are a knowledgeable AI assistant who can help with any topic. When salon-related questions come up, you have detailed information about Goodness Glamour Salon. Be helpful, friendly, and provide accurate information on whatever topic is discussed!
 `;
 
 // Initialize Gemini AI
@@ -177,6 +192,12 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyDEw4nW
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   systemInstruction: SALON_CONTEXT,
+  generationConfig: {
+    maxOutputTokens: 2048,
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40,
+  },
 });
 
 // Store chat sessions by user/session ID
@@ -190,13 +211,14 @@ function getChatSession(sessionId: string = "default") {
     const chat = model.startChat({
       history: [],
       generationConfig: {
-        maxOutputTokens: 1000,
+        maxOutputTokens: 2048,
         temperature: 0.7,
         topP: 0.8,
         topK: 40,
       },
     });
     chatSessions.set(sessionId, chat);
+    console.log(`🆕 New chat session created: ${sessionId}`);
   }
   return chatSessions.get(sessionId);
 }
@@ -217,8 +239,19 @@ export async function chatWithGemini(message: string, sessionId: string = "defau
   } catch (error: any) {
     console.error("❌ Gemini AI Error:", error.message);
     
-    // Fallback response if API fails
-    return "I apologize, but I'm having trouble connecting right now. Please contact us directly at 9036626642 or email 2akonsultant@gmail.com for immediate assistance. You can also try booking directly through our website!";
+    // Enhanced fallback response with salon-specific information
+    if (error.message.includes("quota") || error.message.includes("limit")) {
+      return "I'm currently experiencing high demand. Please contact us directly at 9036626642 for immediate assistance, or email 2akonsultant@gmail.com. You can also book directly through our website - we're here to help with all your salon needs! 💇‍♀️";
+    }
+    
+    // Check if it's a salon-related question and provide relevant fallback
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes("service") || lowerMessage.includes("price") || lowerMessage.includes("booking")) {
+      return "I can help you with our salon services! We offer:\n\n💇‍♀️ **Women's Services**: Haircuts (₹400-1,200), Coloring (₹1,200-3,500), Treatments (₹600-2,000)\n👶 **Kids Services**: Haircuts (₹150-500), Party Styling (₹200-600)\n👰 **Bridal Services**: Complete packages (₹15,000-30,000)\n\n📍 We provide doorstep service across the city!\n📞 Call 9036626642 to book now!\n⏰ Hours: 9 AM - 8 PM, all days";
+    }
+    
+    // General fallback
+    return "I apologize, but I'm having trouble connecting right now. Please contact us directly at 9036626642 or email 2akonsultant@gmail.com for immediate assistance. You can also try booking directly through our website! We're here to help with all your beauty needs! ✨";
   }
 }
 

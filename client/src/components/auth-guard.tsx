@@ -73,8 +73,35 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   }
 
   const isAuthenticated = token && user && user.isVerified;
-  const authPages = ["/login", "/signup", "/verify-otp"];
+  const authPages = ["/login", "/signup", "/verify-otp", "/admin-login"];
   const isOnAuthPage = authPages.includes(location);
+
+  // Role-based redirect logic
+  if (isAuthenticated && !isOnAuthPage) {
+    // If admin tries to access regular user pages, redirect to admin dashboard
+    if (user.role === "admin" && !location.startsWith("/admin")) {
+      if (location === "/dashboard" || location === "/my-bookings") {
+        setLocation("/admin-dashboard");
+        return <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Redirecting...</p>
+          </div>
+        </div>;
+      }
+    }
+    
+    // If regular user tries to access admin pages, redirect to my bookings
+    if (user.role !== "admin" && location.startsWith("/admin")) {
+      setLocation("/my-bookings");
+      return <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>;
+    }
+  }
 
   // If not authenticated and not on auth page, show login
   if (!isAuthenticated && !isOnAuthPage) {

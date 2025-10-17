@@ -26,7 +26,8 @@ export const customers = pgTable("customers", {
 
 export const bookings = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  customerId: varchar("customer_id").references(() => customers.id).notNull(),
+  customerId: varchar("customer_id").references(() => customers.id), // Optional for backward compatibility
+  userId: varchar("user_id").references(() => users.id), // Link to authenticated users
   serviceIds: jsonb("service_ids").notNull(), // array of service IDs
   appointmentDate: timestamp("appointment_date").notNull(),
   status: text("status").default("pending"), // 'pending' | 'confirmed' | 'completed' | 'cancelled'
@@ -96,6 +97,8 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
     }
     return val;
   }),
+  customerId: z.string().optional(),
+  userId: z.string().optional(),
 });
 
 export const insertAiConversationSchema = createInsertSchema(aiConversations).omit({
