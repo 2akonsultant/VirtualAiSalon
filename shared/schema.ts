@@ -51,20 +51,25 @@ export const contactMessages = pgTable("contact_messages", {
   phone: text("phone").notNull(),
   serviceInterest: text("service_interest").notNull(),
   address: text("address").notNull(),
-  message: text("message").notNull(),
+  message: text("message"),
   emailSent: boolean("email_sent").default(false),
   excelUpdated: boolean("excel_updated").default(false),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
-// Users table for authentication with OTP
+// Users table for authentication with OTP and OAuth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(), // Hashed password
+  password: text("password"), // Hashed password (optional for OAuth users)
   name: text("name").notNull(),
   phone: text("phone"),
   role: text("role").default("customer"), // "customer" or "admin"
+  
+  // OAuth fields
+  googleId: text("google_id"), // Google user ID
+  profilePicture: text("profile_picture"), // Profile picture URL
+  provider: text("provider").default("local"), // "local" or "google"
   
   // OTP Verification fields
   isVerified: boolean("is_verified").default(false),
@@ -121,6 +126,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
   otp: true,
   otpExpiry: true,
   otpAttempts: true,
+}).extend({
+  password: z.string().optional(), // Make password optional for OAuth users
 });
 
 export type Service = typeof services.$inferSelect;

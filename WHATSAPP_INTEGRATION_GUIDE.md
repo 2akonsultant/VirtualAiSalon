@@ -42,7 +42,7 @@ Your Goodness Glamour Salon website now has a fully functional WhatsApp chat int
 #### Basic Usage (Current Implementation)
 ```tsx
 <WhatsAppChat 
-  phoneNumber="+919424309363"
+  phoneNumber=""
   showAIChat={true}
 />
 ```
@@ -50,7 +50,7 @@ Your Goodness Glamour Salon website now has a fully functional WhatsApp chat int
 #### Advanced Customization
 ```tsx
 <WhatsAppChat 
-  phoneNumber="+919424309363"
+  phoneNumber=""
   message="Custom default message"
   showAIChat={false} // Hide AI chat button
 />
@@ -102,7 +102,7 @@ The component is designed to be easily extensible:
 
 ### 📞 Business Number Configuration
 
-Currently configured with: `+919424309363`
+Currently configured with: ``
 
 To change the phone number, update the `phoneNumber` prop in `App.tsx`:
 

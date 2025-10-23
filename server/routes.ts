@@ -485,6 +485,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(payload);
   });
 
+  // JSON config endpoint for frontend to fetch Google Client ID
+  app.get("/api/auth/google/config", (_req, res) => {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+    if (!googleClientId) {
+      return res.status(200).json({ clientId: "", configured: false });
+    }
+    res.json({ clientId: googleClientId, configured: true });
+  });
+
+  // Serve Google OAuth test page
+  app.get("/google-oauth-test.html", (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(__dirname, '..', 'client', 'public', 'google-oauth-test.html');
+    
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(content);
+    } catch (error) {
+      res.status(404).send('Test page not found');
+    }
+  });
+
+
   /**
    * POST /api/auth/google
    * Google OAuth authentication
@@ -501,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Import Google OAuth verification
-      const { OAuth2Client } = require('google-auth-library');
+      const { OAuth2Client } = await import('google-auth-library');
       const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
       // Verify Google token
@@ -529,9 +554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: payload.email,
           googleId: payload.sub,
           profilePicture: payload.picture,
-          isVerified: true,
           provider: 'google',
-          createdAt: new Date().toISOString()
+          // password is optional for OAuth users
         };
 
         user = await storage.createUser(newUser);
@@ -548,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate JWT token
-      const jwtToken = generateToken(user);
+      const jwtToken = generateToken(user.id, user.email, user.role || "customer");
 
       // Return success response
       res.json({

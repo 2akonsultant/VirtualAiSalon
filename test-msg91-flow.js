@@ -17,7 +17,7 @@ console.log('=====================\n');
 // Configuration
 const apiKey = process.env.MSG91_API_KEY;
 const templateId = process.env.MSG91_TEMPLATE_ID || 'EnterSMStemplateID';
-const testPhone = process.argv[2] || '919424309363'; // Your phone number from the curl command
+const testPhone = process.argv[2] || ''; // Your phone number from the curl command
 
 console.log('🔍 Configuration:');
 console.log('API Key:', apiKey ? '✅ Set' : '❌ Missing');
@@ -117,5 +117,5 @@ async function testFlowAPI() {
 // Run the test
 testFlowAPI().catch(console.error);
 
-console.log('\n💡 Usage: node test-msg91-flow.js 919424309363');
+console.log('\n💡 Usage: node test-msg91-flow.js ');
 console.log('📖 See MSG91_FLOW_API_SETUP.md for detailed setup');

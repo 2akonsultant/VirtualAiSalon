@@ -30,25 +30,25 @@ function Router() {
         <Route path="/verify-otp" component={VerifyOTP} />
         <Route path="/admin-login" component={AdminLogin} />
         
-        {/* Protected routes - require authentication */}
+        {/* Public routes - accessible without authentication */}
         <Route path="/">
-          <AuthGuard>
-            <Navigation />
-            <Home />
-          </AuthGuard>
+          <Navigation />
+          <Home />
         </Route>
         <Route path="/services">
-          <AuthGuard>
-            <Navigation />
-            <Services />
-          </AuthGuard>
+          <Navigation />
+          <Services />
         </Route>
         <Route path="/services/:category">
-          <AuthGuard>
-            <Navigation />
-            <Services />
-          </AuthGuard>
+          <Navigation />
+          <Services />
         </Route>
+        <Route path="/about-service">
+          <Navigation />
+          <AboutService />
+        </Route>
+        
+        {/* Protected routes - require authentication */}
         <Route path="/booking">
           <AuthGuard>
             <Navigation />
@@ -59,12 +59,6 @@ function Router() {
           <AuthGuard>
             <Navigation />
             <ScanQR />
-          </AuthGuard>
-        </Route>
-        <Route path="/about-service">
-          <AuthGuard>
-            <Navigation />
-            <AboutService />
           </AuthGuard>
         </Route>
         <Route path="/dashboard">
@@ -107,8 +101,8 @@ function App() {
           <Router />
           <Toaster />
           <WhatsAppChat 
-            phoneNumber="9424309363"
-            message="How can I help you?"
+            phoneNumber=""
+            message="Hi, I would like to inquire about booking services"
           />
         </div>
       </TooltipProvider>

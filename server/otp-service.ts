@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { sendOTPEmail } from './email-service';
 
 /**
  * Generate a 6-digit OTP
@@ -8,11 +9,11 @@ export function generateOTP(): string {
 }
 
 /**
- * Get OTP expiry time (10 minutes from now)
+ * Get OTP expiry time (2 minutes from now)
  */
 export function getOTPExpiry(): Date {
   const expiry = new Date();
-  expiry.setMinutes(expiry.getMinutes() + 10); // 10 minutes
+  expiry.setMinutes(expiry.getMinutes() + 2); // 2 minutes
   return expiry;
 }
 
@@ -36,5 +37,37 @@ export function isValidOTPFormat(otp: string): boolean {
  */
 export function isTooManyAttempts(attempts: number): boolean {
   return attempts >= 5; // Max 5 attempts
+}
+
+/**
+ * Send OTP via email with fallback to console logging
+ */
+export async function sendOTPWithEmail(
+  email: string,
+  name: string,
+  otp: string
+): Promise<{ success: boolean; method: 'email' | 'console' }> {
+  try {
+    console.log(`📧 Attempting to send OTP email to: ${email}`);
+    
+    const emailSent = await sendOTPEmail(email, name, otp);
+    
+    if (emailSent) {
+      console.log(`✅ OTP email sent successfully to ${email}`);
+      return { success: true, method: 'email' };
+    } else {
+      // Fallback to console logging for development
+      console.log(`⚠️ Email failed, logging OTP to console for development`);
+      console.log(`🔐 OTP for ${name} (${email}): ${otp}`);
+      console.log(`⏰ OTP expires in 2 minutes`);
+      return { success: true, method: 'console' };
+    }
+  } catch (error) {
+    console.error('❌ Error sending OTP:', error);
+    // Fallback to console logging
+    console.log(`🔐 OTP for ${name} (${email}): ${otp}`);
+    console.log(`⏰ OTP expires in 2 minutes`);
+    return { success: true, method: 'console' };
+  }
 }
 

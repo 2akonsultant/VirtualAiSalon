@@ -4,15 +4,14 @@ import { Menu, X, Calendar, LogIn, UserPlus, LogOut, User, Settings, ArrowRight 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { getAuthStatus } from "@/lib/auth";
 
 export default function Navigation() {
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
   // Check if user is logged in
-  const token = localStorage.getItem("authToken");
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
+  const { isAuthenticated, user } = getAuthStatus();
 
   const handleLogout = () => {
     console.log("🚪 Logout button clicked");
@@ -44,37 +43,49 @@ export default function Navigation() {
     ? [
         { href: "/services", label: "Services" },
         { href: "/admin-dashboard", label: "Admin Dashboard" },
+        { href: "/", label: "Special Offers", hash: "#special-offers" },
         { href: "/", label: "How It Works", hash: "#how-it-works" },
         { href: "/", label: "Contact", hash: "#contact" },
       ]
     : [
         { href: "/services", label: "Services" },
         { href: "/my-bookings", label: "My Bookings" },
+        { href: "/", label: "Special Offers", hash: "#special-offers" },
         { href: "/", label: "How It Works", hash: "#how-it-works" },
         { href: "/", label: "Contact", hash: "#contact" },
       ];
 
   const handleNavClick = (href: string, hash?: string) => {
     setIsOpen(false);
-    if (hash && location === "/") {
-      setTimeout(() => {
-        document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+    if (hash) {
+      if (location === "/") {
+        // Already on homepage, just scroll to section
+        setTimeout(() => {
+          document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      } else {
+        // Navigate to homepage first, then scroll to section
+        setLocation("/");
+        setTimeout(() => {
+          document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" });
+        }, 500);
+      }
     }
   };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-[#2c1810]/85 backdrop-blur-md border-b border-[#c9a869]/20 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-24">
-          <Link href="/" data-testid="link-home">
-            <h1 className="text-3xl font-serif font-semibold text-[#faf8f3] hover:text-[#d4af37] transition-colors">
-              Goodness Glamour
-            </h1>
-          </Link>
+      <div className="site-header">
+        <div className="header-container">
+          {/* Logo Section */}
+          <div className="logo-section">
+            <Link href="/" data-testid="link-home">
+              <h1>Goodness Glamour</h1>
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="nav-links hidden md:flex">
             {navItems.map((item) => (
               <Link
                 key={item.href + (item.hash || "")}
@@ -82,13 +93,14 @@ export default function Navigation() {
                 onClick={() => handleNavClick(item.href, item.hash)}
                 data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <span className="text-lg text-[#faf8f3] hover:text-[#d4af37] transition-colors cursor-pointer">
-                  {item.label}
-                </span>
+                {item.label}
               </Link>
             ))}
+          </div>
             
-            {token && user ? (
+          {/* Header Action Buttons */}
+          <div className="header-actions">
+            {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 p-3 h-auto text-[#faf8f3]">
@@ -136,27 +148,19 @@ export default function Navigation() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="outline" size="lg" className="flex items-center border-[#c9a869] text-[#faf8f3] hover:bg-[#d4af37] hover:text-[#2c1810]">
-                    <LogIn className="h-5 w-5 mr-2" />
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button variant="default" size="lg" className="flex items-center bg-[#c9a869] text-[#2c1810] hover:bg-[#d4af37]">
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    Sign Up
-                  </Button>
-                </Link>
-              </>
+              <Link href="/login">
+                <button className="btn-signin">
+                  <LogIn className="h-4 w-4" />
+                  Sign In/Sign Up
+                </button>
+              </Link>
             )}
             
             <Link href="/booking" data-testid="button-book-now">
-              <Button className="flex items-center text-lg px-6 py-3 bg-[#c9a869] text-[#2c1810] hover:bg-[#d4af37]">
-                <Calendar className="h-5 w-5 mr-2" />
+              <button className="btn-book">
+                <Calendar className="h-4 w-4" />
                 Book Now
-              </Button>
+              </button>
             </Link>
           </div>
 
@@ -190,7 +194,7 @@ export default function Navigation() {
                   ))}
                   
                   {/* Mobile Auth Buttons */}
-                  {token && user ? (
+                  {isAuthenticated && user ? (
                     <>
                       <div className="flex items-center gap-3 text-xl text-foreground py-3 border-b border-gray-700">
                         <div className="w-12 h-12 bg-gradient-to-br from-amber-700 via-amber-600 to-amber-800 rounded-full flex items-center justify-center">
@@ -257,24 +261,16 @@ export default function Navigation() {
                       </div>
                     </>
                   ) : (
-                    <>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
-                        <Button variant="outline" className="w-full flex items-center justify-center text-lg py-3">
-                          <LogIn className="h-5 w-5 mr-2" />
-                          Login
-                        </Button>
-                      </Link>
-                      <Link href="/signup" onClick={() => setIsOpen(false)}>
-                        <Button variant="default" className="w-full flex items-center justify-center text-lg py-3">
-                          <UserPlus className="h-5 w-5 mr-2" />
-                          Sign Up
-                        </Button>
-                      </Link>
-                    </>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="default" className="w-full flex items-center justify-center text-lg py-3 bg-[#d4af37] text-[#2c1810] hover:bg-[#b8860b] font-semibold shadow-lg">
+                        <LogIn className="h-5 w-5 mr-2" />
+                        Sign In/Sign Up
+                      </Button>
+                    </Link>
                   )}
                   
                   <Link href="/booking" onClick={() => setIsOpen(false)} data-testid="button-mobile-book">
-                    <Button className="btn-primary w-full flex items-center justify-center text-lg py-3">
+                    <Button className="w-full flex items-center justify-center text-lg py-3 bg-[#d4af37] text-[#2c1810] hover:bg-[#b8860b] font-semibold shadow-lg">
                       <Calendar className="h-5 w-5 mr-2" />
                       Book Appointment
                     </Button>

@@ -9,7 +9,7 @@ export interface ContactMessage {
   phone: string;
   serviceInterest: string;
   address: string;
-  message: string;
+  message?: string;
   timestamp: string;
 }
 
@@ -29,20 +29,48 @@ export interface BookingData {
 
 // Email configuration
 const createTransporter = () => {
+  // Check if email is enabled
+  if (process.env.EMAIL_ENABLED !== 'true') {
+    console.log('⚠️ Email service is disabled (EMAIL_ENABLED=false)');
+    return null;
+  }
+
+  // Validate required environment variables
+  const emailUser = process.env.EMAIL_USER;
+  const emailPassword = process.env.EMAIL_PASSWORD;
+  
+  if (!emailUser || !emailPassword) {
+    console.error('❌ Email configuration missing:');
+    console.error(`  EMAIL_USER: ${emailUser ? 'SET' : 'NOT SET'}`);
+    console.error(`  EMAIL_PASSWORD: ${emailPassword ? 'SET' : 'NOT SET'}`);
+    console.error('Please configure email credentials in .env file');
+    return null;
+  }
+
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: false, // true for 465, false for other ports
     auth: {
-      user: process.env.EMAIL_USER || '2akonsultant@gmail.com',
-      pass: process.env.EMAIL_PASSWORD || '', // Gmail App Password
+      user: emailUser,
+      pass: emailPassword,
     },
+    tls: {
+      rejectUnauthorized: false // For development only
+    }
   });
   
   // Verify transporter configuration (only log errors)
   transporter.verify((error, success) => {
     if (error) {
       console.error('❌ Email transporter verification failed:', error);
+      console.error('💡 Make sure you have:');
+      console.error('   1. Gmail App Password (not regular password)');
+      console.error('   2. 2-Factor Authentication enabled');
+      console.error('   3. Correct EMAIL_USER and EMAIL_PASSWORD in .env');
+    } else {
+      console.log('✅ Email transporter verified successfully');
     }
-    // Don't log success every time to avoid spam
   });
   
   return transporter;
@@ -52,6 +80,10 @@ const createTransporter = () => {
 export async function sendContactEmail(contact: ContactMessage): Promise<boolean> {
   try {
     const transporter = createTransporter();
+    if (!transporter) {
+      console.log('⚠️ Email service disabled, skipping contact email');
+      return false;
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
@@ -169,14 +201,14 @@ export async function sendContactEmail(contact: ContactMessage): Promise<boolean
                       </div>
                       
                       <!-- Message Section -->
-                      <div style="background: linear-gradient(135deg, #f0f9f8 0%, #f5faf9 100%); padding: 30px; border-radius: 18px; margin-bottom: 30px; border: 1px solid #e0f0ed; box-shadow: 0 4px 16px rgba(180,220,210,0.08);">
+                      ${contact.message ? `<div style="background: linear-gradient(135deg, #f0f9f8 0%, #f5faf9 100%); padding: 30px; border-radius: 18px; margin-bottom: 30px; border: 1px solid #e0f0ed; box-shadow: 0 4px 16px rgba(180,220,210,0.08);">
                         <h3 style="margin: 0 0 18px 0; color: #88b8a8; font-size: 16px; font-weight: 500; letter-spacing: 1px; font-family: 'Georgia', serif;">
                           Customer Message
                         </h3>
                         <div style="background-color: #ffffff; padding: 22px 25px; border-radius: 14px; border-left: 3px solid #a8d4c4; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                           <p style="margin: 0; color: #687878; font-size: 15px; line-height: 1.8; white-space: pre-wrap; font-family: 'Georgia', serif;">${contact.message}</p>
                         </div>
-                      </div>
+                      </div>` : ''}
                       
                       <!-- Action Button -->
                       <div style="background: linear-gradient(135deg, #f5fff8 0%, #f8fff9 100%); padding: 35px 30px; border-radius: 18px; text-align: center; border: 1px solid #e8f5ed; box-shadow: 0 4px 16px rgba(180,220,200,0.1);">
@@ -337,6 +369,10 @@ export async function processContactMessage(contact: ContactMessage): Promise<{
 export async function sendBookingEmail(booking: BookingData): Promise<boolean> {
   try {
     const transporter = createTransporter();
+    if (!transporter) {
+      console.log('⚠️ Email service disabled, skipping booking email');
+      return false;
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
@@ -598,6 +634,10 @@ export async function sendCustomerBookingConfirmation(booking: BookingData): Pro
     console.log(`✅ Customer email validation passed: "${booking.customerEmail}"`);
     
     const transporter = createTransporter();
+    if (!transporter) {
+      console.log('⚠️ Email service disabled, skipping customer confirmation');
+      return false;
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
@@ -852,6 +892,10 @@ export async function testEmailConfiguration(): Promise<boolean> {
   try {
     console.log('🧪 Testing email configuration...');
     const transporter = createTransporter();
+    if (!transporter) {
+      console.log('❌ Email service is disabled or not configured');
+      return false;
+    }
     
     const testMailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
@@ -939,6 +983,11 @@ export async function sendOTPEmail(
     console.log(`📧 Sending OTP to: ${email}`);
     
     const transporter = createTransporter();
+    if (!transporter) {
+      console.log('⚠️ Email service disabled, OTP will be logged to console');
+      console.log(`🔐 OTP for ${name} (${email}): ${otp}`);
+      return false;
+    }
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
@@ -997,7 +1046,7 @@ export async function sendOTPEmail(
                         </div>
                         
                         <p style="margin: 0; color: #b8a0b8; font-size: 14px; line-height: 1.6;">
-                          This code will expire in <strong style="color: #8080c0;">10 minutes</strong>
+                          This code will expire in <strong style="color: #8080c0;">2 minutes</strong>
                         </p>
                       </div>
                       

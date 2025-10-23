@@ -50,7 +50,7 @@ export default function LoginPage() {
       if (data.user.role === "admin") {
         setLocation("/admin-dashboard");
       } else {
-        setLocation("/my-bookings");
+        setLocation("/");
       }
     },
     onError: (error: Error) => {

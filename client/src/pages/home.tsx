@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import AIChat from "@/components/ai-chat";
 import ServiceCard from "@/components/service-card";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { getAuthStatus } from "@/lib/auth";
 import type { Service } from "@shared/schema";
 
 export default function Home() {
@@ -45,10 +45,19 @@ export default function Home() {
   // Contact form submission mutation
   const contactMutation = useMutation({
     mutationFn: async (formData: typeof contactForm) => {
-      const response = await apiRequest("POST", "/api/contact", formData);
-      return response.json();
+      try {
+        console.log('Submitting contact form:', formData);
+        const response = await apiRequest("POST", "/api/contact", formData);
+        const result = await response.json();
+        console.log('Contact form response:', result);
+        return result;
+      } catch (error) {
+        console.error('Contact form API error:', error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Contact form success:', data);
       toast({
         title: "Message Sent!",
         description: "Thank you! We'll contact you soon.",
@@ -63,6 +72,7 @@ export default function Home() {
       });
     },
     onError: (error: any) => {
+      console.error('Contact form mutation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to send message. Please try again.",
@@ -74,37 +84,76 @@ export default function Home() {
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
-    if (!contactForm.name || !contactForm.phone || !contactForm.serviceInterest || !contactForm.address) {
+    // Check if user is authenticated
+    const { isAuthenticated } = getAuthStatus();
+
+    if (!isAuthenticated) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Please Sign In",
+        description: "Please sign in to send us a message.",
         variant: "destructive",
       });
+      setLocation("/login");
       return;
     }
     
-    contactMutation.mutate(contactForm);
+    try {
+      // Validate required fields
+      if (!contactForm.name || !contactForm.phone || !contactForm.serviceInterest || !contactForm.address) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      contactMutation.mutate(contactForm);
+    } catch (error) {
+      console.error('Contact form submission error:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred while submitting the form. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleServiceAI = (service: Service) => {
+    // Check if user is authenticated
+    const { isAuthenticated } = getAuthStatus();
+
+    if (!isAuthenticated) {
+      setLocation("/login");
+      return;
+    }
+    
     setShowAIChat(true);
     setAiInitialMessage(`I'm interested in learning more about ${service.name}. Can you tell me more details?`);
   };
 
   const handleServiceBook = (service: Service) => {
+    // Check if user is authenticated
+    const { isAuthenticated } = getAuthStatus();
+
+    if (!isAuthenticated) {
+      // Redirect to login with a message
+      setLocation("/login");
+      return;
+    }
+    
     setLocation("/booking");
   };
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="pt-16 gradient-hero relative overflow-hidden">
+      <section className="pt-16 gradient-hero relative overflow-hidden hero-section">
         {/* Decorative shapes in white area (subtle, on large screens only) */}
         <span className="hidden lg:block pointer-events-none absolute right-10 top-12 w-28 h-28 rounded-full" style={{background:'rgba(212,175,55,0.12)'}}></span>
         <span className="hidden lg:block pointer-events-none absolute right-36 top-40 w-20 h-20 rounded-lg float-slow" style={{background:'rgba(139,90,60,0.12)'}}></span>
         <span className="hidden lg:block pointer-events-none absolute right-16 bottom-24 h-[2px] w-40 ornament-line opacity-60"></span>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+        <div className="relative z-10 section-container py-12 lg:py-20">
           <div className="h-[2px] w-32 ornament-line rounded-full mb-6"></div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
@@ -137,7 +186,16 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  onClick={() => setLocation("/booking")}
+                  onClick={() => {
+                    // Check if user is authenticated
+                    const { isAuthenticated } = getAuthStatus();
+
+                    if (!isAuthenticated) {
+                      setLocation("/login");
+                      return;
+                    }
+                    setLocation("/booking");
+                  }}
                   className="btn-primary flex items-center justify-center"
                   data-testid="button-book-appointment"
                 >
@@ -180,15 +238,83 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Special Offers Section */}
+      <section id="special-offers" className="py-16 bg-gradient-to-b from-[#f5f0e8] via-[#f8f6f0] to-[#fafafa] relative overflow-hidden special-offers-section" data-testid="special-offers">
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <h2 className="special-offers-heading mb-4">
+              🎉 Special Offers
+            </h2>
+            <p className="special-offers-description max-w-2xl mx-auto">
+              Exciting offers coming soon! Stay tuned for amazing deals on our premium salon services.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Offer Card 1 */}
+            <Card className="p-8 bg-gradient-to-br from-[#fafafa] to-[#f5f0e8] border border-[#d4af37]/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#a0522d] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">💇‍♀️</span>
+                </div>
+                <h3 className="special-offers-card-title mb-2">Hair Treatments</h3>
+                <p className="special-offers-card-description mb-4">Premium hair care services at special rates</p>
+                <div className="special-offers-coming-soon">Coming Soon</div>
+              </div>
+            </Card>
+
+            {/* Offer Card 2 */}
+            <Card className="p-8 bg-gradient-to-br from-[#fafafa] to-[#f5f0e8] border border-[#d4af37]/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#a0522d] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">👶</span>
+                </div>
+                <h3 className="special-offers-card-title mb-2">Kids Services</h3>
+                <p className="special-offers-card-description mb-4">Special packages for children's hair care</p>
+                <div className="special-offers-coming-soon">Coming Soon</div>
+              </div>
+            </Card>
+
+            {/* Offer Card 3 */}
+            <Card className="p-8 bg-gradient-to-br from-[#fafafa] to-[#f5f0e8] border border-[#d4af37]/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 md:col-span-2 lg:col-span-1">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#a0522d] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <h3 className="special-offers-card-title mb-2">Premium Packages</h3>
+                <p className="special-offers-card-description mb-4">Comprehensive beauty solutions at discounted rates</p>
+                <div className="special-offers-coming-soon">Coming Soon</div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Notify Me Button */}
+          <div className="text-center mt-12">
+            <Button 
+              className="btn-primary px-8 py-3 text-lg special-offers-button"
+              onClick={() => {
+                toast({
+                  title: "Coming Soon!",
+                  description: "We'll notify you when our special offers are available.",
+                });
+              }}
+            >
+              <span className="mr-2">🔔</span>
+              Notify Me When Available
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Services */}
-      <section className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8] relative overflow-hidden" data-testid="featured-services">
+      <section className="py-16 bg-gradient-to-b from-[#fafafa] via-[#f8f6f0] to-[#f5f0e8] relative overflow-hidden services-section" data-testid="featured-services">
         {/* Decorative shapes for subtle motion on empty sides */}
         {/* Diamond + square + thin line (replaces circle-only look) */}
         <span className="hidden lg:block pointer-events-none absolute left-10 top-16 w-24 h-24 transform rotate-45 border float-slow" style={{borderColor:'rgba(212,175,55,0.25)', background:'rgba(212,175,55,0.06)'}}></span>
         <span className="hidden lg:block pointer-events-none absolute left-32 bottom-12 w-16 h-16 rounded-lg float-slow" style={{background:'rgba(139,90,60,0.10)'}}></span>
         <span className="hidden lg:block pointer-events-none absolute right-12 top-12 w-24 h-[2px] ornament-line opacity-70"></span>
         <span className="hidden lg:block pointer-events-none absolute right-32 bottom-16 h-[2px] w-40 ornament-line opacity-60"></span>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 section-container">
           <div className="h-[1px] w-24 ornament-line rounded-full mx-auto mb-8 opacity-70"></div>
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-serif font-bold text-foreground mb-4">
@@ -314,7 +440,16 @@ export default function Home() {
               </div>
 
               <Button 
-                onClick={() => setShowAIChat(true)}
+                onClick={() => {
+                  // Check if user is authenticated
+                  const { isAuthenticated } = getAuthStatus();
+
+                  if (!isAuthenticated) {
+                    setLocation("/login");
+                    return;
+                  }
+                  setShowAIChat(true);
+                }}
                 className="btn-accent flex items-center"
                 data-testid="button-try-ai-assistant"
               >
@@ -475,7 +610,16 @@ export default function Home() {
 
               <div className="mt-8 space-y-4">
                 <Button 
-                  onClick={() => setLocation("/booking")}
+                  onClick={() => {
+                    // Check if user is authenticated
+                    const { isAuthenticated } = getAuthStatus();
+
+                    if (!isAuthenticated) {
+                      setLocation("/login");
+                      return;
+                    }
+                    setLocation("/booking");
+                  }}
                   className="w-full flex items-center justify-center rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out bg-[#d4af37] text-[#2c1810] hover:bg-[#b8860b]"
                   data-testid="button-book-appointment-contact"
                 >
@@ -483,7 +627,16 @@ export default function Home() {
                   Book Appointment Now
                 </Button>
                 <Button 
-                  onClick={() => setShowAIChat(true)}
+                  onClick={() => {
+                    // Check if user is authenticated
+                    const { isAuthenticated } = getAuthStatus();
+
+                    if (!isAuthenticated) {
+                      setLocation("/login");
+                      return;
+                    }
+                    setShowAIChat(true);
+                  }}
                   className="w-full flex items-center justify-center rounded-lg font-semibold tracking-wide py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-out bg-[#8b5a3c] text-white hover:bg-[#a0522d]"
                   data-testid="button-chat-ai-contact"
                 >
@@ -535,22 +688,21 @@ export default function Home() {
                 
                 <div>
                   <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Service Interest *</label>
-                  <Select 
+                  <select 
                     value={contactForm.serviceInterest}
-                    onValueChange={(value) => setContactForm({...contactForm, serviceInterest: value})}
+                    onChange={(e) => setContactForm({...contactForm, serviceInterest: e.target.value})}
+                    data-testid="select-service-interest"
+                    className="w-full h-10 px-3 py-2 bg-[#fafafa] border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/40 focus:border-[#d4af37] disabled:cursor-not-allowed disabled:opacity-50"
+                    required
                   >
-                    <SelectTrigger data-testid="select-service-interest" className="bg-[#fafafa] focus:border-[#d4af37] focus:ring-[#d4af37]/40">
-                      <SelectValue placeholder="Select a service" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Women's Hair Services">Women's Hair Services</SelectItem>
-                      <SelectItem value="Kids Hair Services">Kids Hair Services</SelectItem>
-                      <SelectItem value="Hair Spa & Treatment">Hair Spa & Treatment</SelectItem>
-                      <SelectItem value="Bridal & Party Styling">Bridal & Party Styling</SelectItem>
-                      <SelectItem value="Hair Coloring">Hair Coloring</SelectItem>
-                      <SelectItem value="Consultation">Consultation</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="">Select a service</option>
+                    <option value="Women's Hair Services">Women's Hair Services</option>
+                    <option value="Kids Hair Services">Kids Hair Services</option>
+                    <option value="Hair Spa & Treatment">Hair Spa & Treatment</option>
+                    <option value="Bridal & Party Styling">Bridal & Party Styling</option>
+                    <option value="Hair Coloring">Hair Coloring</option>
+                    <option value="Consultation">Consultation</option>
+                  </select>
                 </div>
                 
                 <div>
@@ -653,7 +805,16 @@ export default function Home() {
 
       {/* Floating AI Chat Button */}
       <Button
-        onClick={() => setShowAIChat(true)}
+        onClick={() => {
+          // Check if user is authenticated
+          const { isAuthenticated } = getAuthStatus();
+
+          if (!isAuthenticated) {
+            setLocation("/login");
+            return;
+          }
+          setShowAIChat(true);
+        }}
         className="ai-chat-button bg-accent text-accent-foreground w-16 h-16 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center"
         data-testid="button-floating-ai-chat"
       >

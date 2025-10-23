@@ -52,6 +52,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Masked logging for critical envs
+  const gid = process.env.GOOGLE_CLIENT_ID || '';
+  const maskedGid = gid ? gid.slice(0, 6) + '…' + gid.slice(-4) : '(missing)';
+  console.log('🔐 Google Client ID:', maskedGid);
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

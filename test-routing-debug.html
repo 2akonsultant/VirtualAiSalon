@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonBooker Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-button { background: #d4af37; color: #2c1810; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .test-button:hover { background: #b8860b; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔍 SalonBooker Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>🚀 Quick Test</h2>
+        <p>Click the button below to open SalonBooker in a new tab and test the routing:</p>
+        <a href="http://localhost:5000/" target="_blank" class="test-button">🏠 Open SalonBooker</a>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Expected Behavior</h2>
+        <div class="status info">
+            <strong>✅ Homepage:</strong> Should load without asking for login/signup
+        </div>
+        <div class="status info">
+            <strong>✅ Navigation:</strong> Should show "Register" and "Sign In" buttons in header
+        </div>
+        <div class="status info">
+            <strong>✅ Services:</strong> Should be accessible without login
+        </div>
+        <div class="status info">
+            <strong>✅ Booking/AI Chat:</strong> Should redirect to login when clicked
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Debug Steps</h2>
+        <ol>
+            <li>Open SalonBooker in a new tab</li>
+            <li>Check if homepage loads without login prompt</li>
+            <li>Look for Register/Sign In buttons in header</li>
+            <li>Try clicking "Book Appointment" - should redirect to login</li>
+            <li>Try clicking "AI Chat" - should redirect to login</li>
+            <li>Open browser console (F12) to check for any JavaScript errors</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🐛 If Still Redirecting to Login</h2>
+        <p>If you're still being redirected to login, try:</p>
+        <ol>
+            <li><strong>Clear Browser Cache:</strong> Press Ctrl+Shift+R (hard refresh)</li>
+            <li><strong>Open Incognito/Private Mode:</strong> Test in a new private window</li>
+            <li><strong>Check Console:</strong> Open F12 and look for JavaScript errors</li>
+            <li><strong>Check Network Tab:</strong> See if there are any failed requests</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Checklist</h2>
+        <div id="checklist">
+            <label><input type="checkbox"> Homepage loads without login prompt</label><br>
+            <label><input type="checkbox"> Header shows Register/Sign In buttons</label><br>
+            <label><input type="checkbox"> Services page accessible without login</label><br>
+            <label><input type="checkbox"> Book Appointment redirects to login</label><br>
+            <label><input type="checkbox"> AI Chat redirects to login</label><br>
+            <label><input type="checkbox"> Contact form redirects to login</label><br>
+        </div>
+    </div>
+
+    <script>
+        // Test if the server is responding
+        fetch('http://localhost:5000/api/services')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ API is working:', data);
+                document.body.insertAdjacentHTML('beforeend', 
+                    '<div class="test-section"><div class="status success">✅ Backend API is working</div></div>'
+                );
+            })
+            .catch(error => {
+                console.error('❌ API Error:', error);
+                document.body.insertAdjacentHTML('beforeend', 
+                    '<div class="test-section"><div class="status error">❌ Backend API connection failed</div></div>'
+                );
+            });
+    </script>
+</body>
+</html>

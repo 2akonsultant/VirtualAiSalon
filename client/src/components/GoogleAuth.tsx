@@ -33,24 +33,52 @@ export default function GoogleAuth({
 
   // Load Google Identity Services
   useEffect(() => {
-    // Prefer Vite env, but fall back to server-provided runtime value when serving from port 5000
-    const clientId = (import.meta as any)?.env?.VITE_GOOGLE_CLIENT_ID as string | undefined;
-    const runtimeClientId = (window as any).__GOOGLE_CLIENT_ID__ as string | undefined;
-    const effectiveClientId = clientId || runtimeClientId;
+    const initializeGoogleAuth = async () => {
+      // Try to get client ID from multiple sources
+      let clientId = (import.meta as any)?.env?.VITE_GOOGLE_CLIENT_ID as string | undefined;
+      
+      // If Vite client ID is not available, try to load from server
+      if (!clientId) {
+        try {
+          // Prefer JSON config first
+          const jsonCfg = await fetch('/api/auth/google/config').then(r => r.ok ? r.json() : { configured: false });
+          if (jsonCfg?.configured && jsonCfg.clientId) {
+            clientId = jsonCfg.clientId;
+          } else {
+            // Fallback to JS config for older setups
+            const response = await fetch('/config.js');
+            if (response.ok) {
+              const script = await response.text();
+              // eslint-disable-next-line no-eval
+              eval(script);
+              clientId = (window as any).__GOOGLE_CLIENT_ID__;
+            }
+          }
+        } catch (error) {
+          console.warn('Could not load config from server:', error);
+        }
+      }
 
-    if (!effectiveClientId) {
-      console.error('Google Client ID missing. Set VITE_GOOGLE_CLIENT_ID in client/.env or provide GOOGLE_CLIENT_ID on the server.');
-      toast({
-        title: 'Google Sign-in',
-        description: 'missing_client_id. Provide VITE_GOOGLE_CLIENT_ID (front-end) or GOOGLE_CLIENT_ID (server).',
-      });
-    }
+      if (!clientId) {
+        console.error('Google Client ID missing. Set VITE_GOOGLE_CLIENT_ID in client/.env or ensure server provides GOOGLE_CLIENT_ID');
+        toast({
+          title: 'Google Sign-in',
+          description: 'Google Client ID not configured. Please contact support.',
+        });
+        return;
+      }
 
-    const loadGoogleScript = () => {
+      console.log('Google Client ID loaded:', clientId.substring(0, 20) + '...');
+      loadGoogleScript(clientId);
+    };
+
+    initializeGoogleAuth();
+
+    const loadGoogleScript = (clientId: string) => {
       if (window.google) {
         try {
           window.google.accounts.id.initialize({
-            client_id: effectiveClientId,
+            client_id: clientId,
             callback: handleGoogleResponse,
             auto_select: false,
             cancel_on_tap_outside: true,
@@ -72,7 +100,7 @@ export default function GoogleAuth({
       script.onload = () => {
         try {
           window.google.accounts.id.initialize({
-            client_id: effectiveClientId,
+            client_id: clientId,
             callback: handleGoogleResponse,
             auto_select: false,
             cancel_on_tap_outside: true,
@@ -91,8 +119,6 @@ export default function GoogleAuth({
       };
       document.head.appendChild(script);
     };
-
-    loadGoogleScript();
   }, []);
 
   const handleGoogleResponse = async (response: any) => {
@@ -130,7 +156,7 @@ export default function GoogleAuth({
         if (data.user.role === 'admin') {
           setLocation('/admin-dashboard');
         } else {
-          setLocation('/my-bookings');
+          setLocation('/');
         }
       } else {
         throw new Error(data.message || 'Google authentication failed');
@@ -153,7 +179,6 @@ export default function GoogleAuth({
   };
 
   const handleGoogleSignIn = (e?: React.MouseEvent) => {
-    // Prevent the button from submitting the surrounding form
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -168,35 +193,42 @@ export default function GoogleAuth({
       return;
     }
 
+    if (!window.google?.accounts?.id) {
+      toast({
+        title: "Error",
+        description: "Google authentication service is not available. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Force showing the account chooser; avoid FedCM-only path to reduce AbortError
-      if (window.google?.accounts?.id) {
-        // Re-initialize with relaxed settings in case the first init was blocked
-        try {
-          const clientId = (import.meta as any)?.env?.VITE_GOOGLE_CLIENT_ID || (window as any).__GOOGLE_CLIENT_ID__;
-          window.google.accounts.id.initialize({
-            client_id: clientId,
-            callback: handleGoogleResponse,
-            auto_select: false,
-            cancel_on_tap_outside: false,
-            itp_support: true,
-            use_fedcm_for_prompt: false,
-          });
-        } catch {}
-      }
-
       window.google.accounts.id.prompt((notification: any) => {
         const notDisplayed = notification.isNotDisplayed?.();
         const skipped = notification.isSkippedMoment?.();
         if (notDisplayed || skipped) {
           setIsLoading(false);
           const reason = notification.getNotDisplayedReason?.() || notification.getSkippedReason?.() || 'Prompt was dismissed';
+          
+          // Provide specific guidance based on the error
+          let errorMessage = '';
+          if (reason === 'suppressed_by_user') {
+            errorMessage = 'Popup blocked. Please allow popups for this site and enable third-party cookies.';
+          } else if (reason === 'unregistered_origin') {
+            errorMessage = 'This domain is not registered with Google OAuth. Please contact support.';
+          } else if (reason === 'invalid_client') {
+            errorMessage = 'Google OAuth configuration error. Please contact support.';
+          } else {
+            errorMessage = `${reason}. If the account chooser didn't appear, enable third‑party cookies or FedCM and ensure no popup blocker is active.`;
+          }
+          
           if (reason !== 'tap_outside') {
             toast({
               title: "Google Sign-in",
-              description: `${reason}. If the account chooser didn't appear, enable third‑party cookies or FedCM and ensure no popup blocker is active.`,
+              description: errorMessage,
+              variant: "destructive",
             });
           }
         }

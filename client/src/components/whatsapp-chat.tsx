@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface WhatsAppChatProps {
   phoneNumber?: string;
@@ -6,23 +6,113 @@ interface WhatsAppChatProps {
 }
 
 const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
-  phoneNumber = '9424309363',
-  message = 'How can I help you?'
+  phoneNumber = '',
+  message = 'Hi, I would like to inquire about booking services'
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Show button after a short delay for better UX
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const openWhatsApp = () => {
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    // Prevent multiple rapid clicks to avoid 429 errors
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Clean phone number - remove any non-digits and ensure it has country code
+      const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+      const formattedNumber = cleanPhoneNumber.startsWith('91') ? cleanPhoneNumber : `91${cleanPhoneNumber}`;
+      
+      // Use the most reliable WhatsApp API format to avoid 429 errors
+      const encodedMessage = encodeURIComponent(message);
+      const primaryUrl = `https://api.whatsapp.com/send?phone=${formattedNumber}&text=${encodedMessage}`;
+      
+      console.log('Opening WhatsApp in NEW TAB with URL:', primaryUrl);
+      
+      // Force open in new tab - this is the key requirement
+      const newWindow = window.open(primaryUrl, '_blank', 'noopener,noreferrer');
+      
+      // Verify new tab opened successfully
+      if (newWindow && !newWindow.closed && typeof newWindow.closed !== 'undefined') {
+        console.log('WhatsApp opened successfully in new tab');
+        // Focus the new tab (optional)
+        newWindow.focus();
+      } else {
+        console.log('New tab blocked, trying alternative method');
+        
+        // Alternative 1: Try the simpler wa.me format in new tab
+        const alternativeUrl = `https://wa.me/${formattedNumber}?text=${encodedMessage}`;
+        const fallbackWindow = window.open(alternativeUrl, '_blank', 'noopener,noreferrer');
+        
+        if (fallbackWindow && !fallbackWindow.closed && typeof fallbackWindow.closed !== 'undefined') {
+          console.log('WhatsApp opened in new tab using wa.me format');
+          fallbackWindow.focus();
+        } else {
+          console.log('All new tab methods failed, trying direct link approach');
+          // Alternative 2: Create a temporary link element for new tab
+          const link = document.createElement('a');
+          link.href = alternativeUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+      
+    } catch (error) {
+      console.error('WhatsApp error:', error);
+      
+      // Emergency fallback - use the simplest format in new tab
+      const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+      const formattedNumber = cleanPhoneNumber.startsWith('91') ? cleanPhoneNumber : `91${cleanPhoneNumber}`;
+      const emergencyUrl = `https://wa.me/${formattedNumber}`;
+      
+      try {
+        const emergencyWindow = window.open(emergencyUrl, '_blank', 'noopener,noreferrer');
+        if (emergencyWindow) {
+          emergencyWindow.focus();
+        }
+      } catch (emergencyError) {
+        console.error('Emergency fallback failed:', emergencyError);
+        // Last resort: create link element for new tab
+        const link = document.createElement('a');
+        link.href = emergencyUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } finally {
+      // Reset loading state after a delay to prevent rapid clicks
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    }
   };
 
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 whatsapp-chat-container">
-      {/* Direct WhatsApp Button */}
+    <div className="whatsapp-chat-container transition-all duration-500 ease-in-out">
       <button
         onClick={openWhatsApp}
-        className="group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#25D366] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-green-300 animate-float whatsapp-hover-glow whatsapp-button-mobile"
-        aria-label="Chat with us on WhatsApp"
+        disabled={isLoading}
+        className={`group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-[#25D366] hover:bg-[#1ebe57] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-green-300 ${isLoading ? 'animate-pulse opacity-75 cursor-not-allowed' : 'animate-pulse'}`}
+        aria-label={isLoading ? "Opening WhatsApp..." : "Chat with us on WhatsApp"}
+        title={isLoading ? "Opening WhatsApp..." : "Chat with us on WhatsApp"}
       >
         <svg 
           className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-300"
@@ -35,11 +125,10 @@ const WhatsAppChat: React.FC<WhatsAppChatProps> = ({
       </button>
 
       {/* Tooltip */}
-      <div className="absolute right-0 bottom-full mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-        Chat with us on WhatsApp
+      <div className="absolute right-0 bottom-full mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+        {isLoading ? "Opening WhatsApp..." : "Chat with us on WhatsApp"}
         <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
       </div>
-
     </div>
   );
 };

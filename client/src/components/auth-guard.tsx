@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import VerifyOTP from "@/pages/verify-otp";
+import { getAuthStatus } from "@/lib/auth";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -14,34 +15,19 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     // Check if user is authenticated
-    const token = localStorage.getItem("authToken");
-    const userStr = localStorage.getItem("user");
-    
-    // Parse user data safely
-    let user = null;
-    try {
-      user = userStr ? JSON.parse(userStr) : null;
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      // Clear invalid user data
-      localStorage.removeItem("user");
-      localStorage.removeItem("authToken");
-    }
-
-    const isAuthenticated = token && user && user.isVerified;
+    const { isAuthenticated, user } = getAuthStatus();
 
     console.log("🔐 Auth Guard Check:", {
-      hasToken: !!token,
-      hasUser: !!user,
-      isVerified: user?.isVerified,
       isAuthenticated,
+      user,
       currentPath: location
     });
 
     // Allow access to auth pages without authentication
-    const authPages = ["/login", "/signup", "/verify-otp"];
+    const authPages = ["/login", "/signup", "/verify-otp", "/admin-login"];
     const isOnAuthPage = authPages.includes(location);
 
+    // Only redirect to login if not authenticated and not on auth page
     if (!isAuthenticated && !isOnAuthPage) {
       console.log("🚪 Redirecting to login - user not authenticated");
       setLocation("/login");
@@ -63,16 +49,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // Check authentication status
-  const token = localStorage.getItem("authToken");
-  const userStr = localStorage.getItem("user");
-  let user = null;
-  try {
-    user = userStr ? JSON.parse(userStr) : null;
-  } catch (error) {
-    user = null;
-  }
-
-  const isAuthenticated = token && user && user.isVerified;
+  const { isAuthenticated, user } = getAuthStatus();
   const authPages = ["/login", "/signup", "/verify-otp", "/admin-login"];
   const isOnAuthPage = authPages.includes(location);
 
@@ -91,9 +68,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       }
     }
     
-    // If regular user tries to access admin pages, redirect to my bookings
+    // If regular user tries to access admin pages, redirect to home
     if (user.role !== "admin" && location.startsWith("/admin")) {
-      setLocation("/my-bookings");
+      setLocation("/");
       return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>

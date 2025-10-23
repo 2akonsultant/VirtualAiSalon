@@ -20,7 +20,7 @@ Step 1: Signup Form
 Step 2: Account Creation
 ├─ Create user account (unverified)
 ├─ Generate 6-digit OTP
-├─ Store OTP with expiry (10 minutes)
+├─ Store OTP with expiry (2 minutes)
 └─ Send OTP email
 
 Step 3: OTP Verification Page
@@ -116,11 +116,11 @@ export function generateOTP(): string {
 }
 
 /**
- * Get OTP expiry time (10 minutes from now)
+ * Get OTP expiry time (2 minutes from now)
  */
 export function getOTPExpiry(): Date {
   const expiry = new Date();
-  expiry.setMinutes(expiry.getMinutes() + 10); // 10 minutes
+  expiry.setMinutes(expiry.getMinutes() + 2); // 2 minutes
   return expiry;
 }
 
@@ -247,7 +247,7 @@ export async function sendOTPEmail(
                         </div>
                         
                         <p style="margin: 0; color: #b8a0b8; font-size: 14px; line-height: 1.6;">
-                          This code will expire in <strong style="color: #8080c0;">10 minutes</strong>
+                          This code will expire in <strong style="color: #8080c0;">2 minutes</strong>
                         </p>
                       </div>
                       
@@ -1091,7 +1091,7 @@ export default function VerifyOTPPage() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
   const [canResend, setCanResend] = useState(false);
 
   const userId = localStorage.getItem("pendingUserId");
@@ -1336,7 +1336,7 @@ if (existingUser && !existingUser.isVerified) {
 ```
 
 ### Issue 2: OTP Expiry
-**Problem:** User enters OTP after 10 minutes
+**Problem:** User enters OTP after 2 minutes
 
 **Solution:**
 ```typescript
@@ -1397,7 +1397,7 @@ if (!user.isVerified) {
 - [ ] User can signup with valid email
 - [ ] OTP email is received
 - [ ] OTP is 6 digits
-- [ ] OTP expires after 10 minutes
+- [ ] OTP expires after 2 minutes
 - [ ] Can't use expired OTP
 - [ ] Can't use wrong OTP (max 5 attempts)
 - [ ] Can resend OTP
@@ -1452,7 +1452,7 @@ users table:
 **What You Get:**
 - ✅ Secure signup with email verification
 - ✅ 6-digit OTP sent via email
-- ✅ OTP expires in 10 minutes
+- ✅ OTP expires in 2 minutes
 - ✅ Max 5 OTP attempts (prevent brute force)
 - ✅ Resend OTP functionality
 - ✅ Auto-login after verification

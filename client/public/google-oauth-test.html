@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google OAuth Test - SalonBooker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background-color: #3367d6; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google OAuth Test - SalonBooker</h1>
+        <p>This page tests the Google OAuth configuration for your SalonBooker application.</p>
+        
+        <div id="config-info" class="status info">
+            <h3>📋 Configuration Status</h3>
+            <div id="config-details">
+                <p><strong>Current Origin:</strong> <span id="current-origin">Loading...</span></p>
+                <p><strong>Google Client ID:</strong> <span id="client-id">Loading...</span></p>
+                <p><strong>Full URL:</strong> <span id="full-url">Loading...</span></p>
+            </div>
+        </div>
+
+        <div>
+            <button id="test-oauth" onclick="testGoogleOAuth()">🔐 Test Google OAuth</button>
+            <button id="load-config" onclick="loadConfig()">🔄 Reload Config</button>
+        </div>
+
+        <div id="test-results" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h3>🧪 Test Results</h3>
+            <div id="results-content"></div>
+        </div>
+
+        <div class="status info">
+            <strong>ℹ️ Instructions:</strong>
+            <ol>
+                <li>Check the configuration details above</li>
+                <li>Click "Test Google OAuth" to test authentication</li>
+                <li>If you see errors, check the browser console for details</li>
+                <li>Common issues: popup blockers, third-party cookies, or domain configuration</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let isGoogleLoaded = false;
+        let clientId = null;
+
+        // Load configuration on page load
+        window.addEventListener('load', function() {
+            loadConfig();
+        });
+
+        async function loadConfig() {
+            try {
+                // Try to load config from server
+                const response = await fetch('/config.js');
+                if (response.ok) {
+                    const script = await response.text();
+                    eval(script);
+                    clientId = window.__GOOGLE_CLIENT_ID__;
+                }
+                
+                // Update display
+                document.getElementById('current-origin').textContent = window.location.origin;
+                document.getElementById('client-id').textContent = clientId || 'Not found';
+                document.getElementById('full-url').textContent = window.location.href;
+                
+                if (clientId) {
+                    showStatus('success', '✅ Configuration loaded successfully');
+                    loadGoogleScript();
+                } else {
+                    showStatus('error', '❌ Google Client ID not found');
+                }
+            } catch (error) {
+                showStatus('error', `❌ Failed to load configuration: ${error.message}`);
+            }
+        }
+
+        function loadGoogleScript() {
+            if (window.google) {
+                isGoogleLoaded = true;
+                showStatus('success', '✅ Google Identity Services already loaded');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+                isGoogleLoaded = true;
+                showStatus('success', '✅ Google Identity Services loaded');
+            };
+            script.onerror = () => {
+                showStatus('error', '❌ Failed to load Google Identity Services');
+            };
+            document.head.appendChild(script);
+        }
+
+        async function testGoogleOAuth() {
+            const resultsDiv = document.getElementById('test-results');
+            const contentDiv = document.getElementById('results-content');
+            
+            resultsDiv.style.display = 'block';
+            contentDiv.innerHTML = '<p>🔄 Testing Google OAuth...</p>';
+
+            if (!clientId) {
+                contentDiv.innerHTML = '<div class="status error">❌ No Google Client ID found</div>';
+                return;
+            }
+
+            if (!isGoogleLoaded) {
+                contentDiv.innerHTML = '<div class="status error">❌ Google Identity Services not loaded</div>';
+                return;
+            }
+
+            try {
+                // Initialize Google Identity Services
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: handleGoogleResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: true,
+                    itp_support: true,
+                    use_fedcm_for_prompt: true,
+                });
+
+                // Test the prompt
+                window.google.accounts.id.prompt((notification) => {
+                    const notDisplayed = notification.isNotDisplayed?.();
+                    const skipped = notification.isSkippedMoment?.();
+                    
+                    if (notDisplayed || skipped) {
+                        const reason = notification.getNotDisplayedReason?.() || notification.getSkippedReason?.() || 'Unknown reason';
+                        contentDiv.innerHTML = `
+                            <div class="status error">
+                                <strong>❌ Google OAuth Test Failed</strong><br>
+                                <strong>Reason:</strong> ${reason}<br>
+                                <strong>Solution:</strong> Check browser settings and Google Cloud Console configuration
+                            </div>
+                        `;
+                    } else {
+                        contentDiv.innerHTML = `
+                            <div class="status success">
+                                <strong>✅ Google OAuth Test Successful</strong><br>
+                                The Google account chooser should have appeared. If you see the chooser, OAuth is working correctly!
+                            </div>
+                        `;
+                    }
+                });
+
+            } catch (error) {
+                contentDiv.innerHTML = `
+                    <div class="status error">
+                        <strong>❌ Google OAuth Test Failed</strong><br>
+                        <strong>Error:</strong> ${error.message}<br>
+                        <strong>Solution:</strong> Check Google Cloud Console configuration
+                    </div>
+                `;
+            }
+        }
+
+        function handleGoogleResponse(response) {
+            const contentDiv = document.getElementById('results-content');
+            contentDiv.innerHTML = `
+                <div class="status success">
+                    <strong>✅ Google OAuth Response Received</strong><br>
+                    <strong>Credential:</strong> ${response.credential.substring(0, 50)}...<br>
+                    <strong>Status:</strong> OAuth is working correctly!
+                </div>
+            `;
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            
+            // Remove existing status messages
+            const existingStatus = document.querySelector('.status:not(.info)');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            document.querySelector('.container').insertBefore(statusDiv, document.querySelector('.status.info'));
+        }
+    </script>
+</body>
+</html>

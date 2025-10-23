@@ -12,7 +12,7 @@ export default function VerifyOTPPage() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
   const [canResend, setCanResend] = useState(false);
 
   const userId = localStorage.getItem("pendingUserId");
@@ -98,7 +98,7 @@ export default function VerifyOTPPage() {
     },
     onSuccess: () => {
       setSuccess("New verification code sent to your email!");
-      setTimeLeft(600); // Reset timer
+      setTimeLeft(120); // Reset timer
       setCanResend(false);
       setError("");
     },

@@ -88,7 +88,7 @@ curl --location 'https://control.msg91.com/api/v5/flow' \
   "realTimeResponse": "1",
   "recipients": [
     {
-      "mobiles": "919424309363",
+      "mobiles": "",
       "VAR1": "Priya",
       "VAR2": "15 Jan 2024",
       "VAR3": "2:00 PM",

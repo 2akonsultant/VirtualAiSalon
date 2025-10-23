@@ -1,6 +1,6 @@
 import { type Service, type Customer, type Booking, type AiConversation, type ContactMessage, type User, type InsertService, type InsertCustomer, type InsertBooking, type InsertAiConversation, type InsertContactMessage, type InsertUser } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { connectToDatabase, getCollection, toObjectId, fromObjectId } from "./db-config";
+import { connectToDatabase, getCollection, toObjectId, fromObjectId, isValidObjectId } from "./db-config";
 
 export interface IStorage {
   // Services
@@ -44,7 +44,7 @@ export interface IStorage {
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
 }
 
-export class MemStorage implements IStorage {
+export class HybridStorage implements IStorage {
   private services: Map<string, Service> = new Map();
   private customers: Map<string, Customer> = new Map();
   private bookings: Map<string, Booking> = new Map();
@@ -63,37 +63,90 @@ export class MemStorage implements IStorage {
       await connectToDatabase();
       this.dbConnected = true;
       console.log('✅ MongoDB connected for hybrid storage');
-      await this.loadServicesFromMongoDB();
+      await this.loadDataFromMongoDB();
     } catch (error) {
       console.log('⚠️ MongoDB not available, using in-memory storage only');
       this.dbConnected = false;
     }
   }
 
-  private async loadServicesFromMongoDB() {
+  private async loadDataFromMongoDB() {
     if (!this.dbConnected) return;
 
     try {
+      // Load services from MongoDB
       const servicesCollection = getCollection('services');
-      const mongoServices = await servicesCollection.find({ isActive: true }).toArray();
-      
+      const mongoServices = await servicesCollection.find({}).toArray();
       if (mongoServices.length > 0) {
-        console.log(`📋 Loading ${mongoServices.length} services from MongoDB...`);
         this.services.clear();
         mongoServices.forEach(service => {
-          const serviceId = fromObjectId(service._id);
-          this.services.set(serviceId, {
+          this.services.set(fromObjectId(service._id), {
             ...service,
-            id: serviceId,
+            id: fromObjectId(service._id),
             _id: undefined
           } as Service);
         });
-        console.log(`✅ Loaded ${mongoServices.length} services from MongoDB`);
-      } else {
-        console.log('⚠️ No services found in MongoDB, using in-memory services');
+        console.log(`📋 Loaded ${mongoServices.length} services from MongoDB`);
       }
+
+      // Load users from MongoDB
+      const usersCollection = getCollection('users');
+      const mongoUsers = await usersCollection.find({}).toArray();
+      if (mongoUsers.length > 0) {
+        this.users.clear();
+        mongoUsers.forEach(user => {
+          this.users.set(fromObjectId(user._id), {
+            ...user,
+            id: fromObjectId(user._id),
+            _id: undefined
+          } as User);
+        });
+        console.log(`👤 Loaded ${mongoUsers.length} users from MongoDB`);
+      }
+
+      // Load contact messages from MongoDB
+      const messagesCollection = getCollection('contactMessages');
+      const mongoMessages = await messagesCollection.find({}).toArray();
+      if (mongoMessages.length > 0) {
+        this.contactMessages.clear();
+        mongoMessages.forEach(message => {
+          this.contactMessages.set(fromObjectId(message._id), {
+            ...message,
+            id: fromObjectId(message._id),
+            _id: undefined
+          } as ContactMessage);
+        });
+        console.log(`💬 Loaded ${mongoMessages.length} messages from MongoDB`);
+      }
+
+      // Load bookings from MongoDB
+      const bookingsCollection = getCollection('bookings');
+      const mongoBookings = await bookingsCollection.find({}).toArray();
+      if (mongoBookings.length > 0) {
+        this.bookings.clear();
+        mongoBookings.forEach(booking => {
+          this.bookings.set(fromObjectId(booking._id), {
+            ...booking,
+            id: fromObjectId(booking._id),
+            _id: undefined
+          } as Booking);
+        });
+        console.log(`📅 Loaded ${mongoBookings.length} bookings from MongoDB`);
+      }
+
     } catch (error) {
-      console.error('❌ Error loading services from MongoDB:', error);
+      console.error('❌ Error loading data from MongoDB:', error);
+    }
+  }
+
+  private async saveToMongoDB(collectionName: string, data: any) {
+    if (!this.dbConnected) return;
+
+    try {
+      const collection = getCollection(collectionName);
+      await collection.insertOne(data);
+    } catch (error) {
+      console.error(`❌ Error saving to MongoDB ${collectionName}:`, error);
     }
   }
 
@@ -121,12 +174,21 @@ export class MemStorage implements IStorage {
     };
 
     this.users.set(adminUser.id, adminUser);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('users', {
+        ...adminUser,
+        _id: toObjectId(adminUser.id)
+      });
+    }
+    
     console.log("✅ Default admin user created: admin@goodnessglamour.com / admin123");
   }
 
   private initializeServices() {
     const defaultServices: InsertService[] = [
-      // Women's Services (8 services)
+      // Women's Hair Services
       {
         name: "Hair Cut & Styling",
         description: "Professional haircuts, blowdry, and styling at your doorstep for all hair types.",
@@ -146,60 +208,51 @@ export class MemStorage implements IStorage {
         imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       },
       {
-        name: "Facial & Cleanup",
-        description: "Deep cleansing facials, blackhead removal, and skin rejuvenation treatments.",
+        name: "Hair Treatment & Conditioning",
+        description: "Deep conditioning, keratin treatment, and nourishing hair masks delivered to your home.",
         category: "women",
-        priceMin: 800,
+        priceMin: 600,
         priceMax: 2000,
         duration: 90,
-        imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+        imageUrl: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       },
       {
-        name: "Makeup & Styling",
-        description: "Professional makeup application for special occasions, parties, and events.",
-        category: "women",
-        priceMin: 1000,
-        priceMax: 3000,
-        duration: 120,
-        imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-      },
-      {
-        name: "Waxing & Threading",
-        description: "Full body waxing, eyebrow threading, and hair removal services at home.",
-        category: "women",
-        priceMin: 300,
-        priceMax: 1500,
-        duration: 60,
-        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-      },
-      {
-        name: "Manicure & Pedicure",
-        description: "Professional nail care, cuticle treatment, and nail art services.",
-        category: "women",
-        priceMin: 500,
-        priceMax: 1200,
-        duration: 90,
-        imageUrl: "https://images.unsplash.com/photo-1604654894610-df63bc536371?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-      },
-      {
-        name: "Bridal Makeup",
-        description: "Complete bridal makeup package with trial sessions and special occasion styling.",
-        category: "women",
-        priceMin: 3000,
-        priceMax: 8000,
-        duration: 180,
-        imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
-      },
-      {
-        name: "Hair Spa Treatment",
-        description: "Deep conditioning, keratin treatment, and nourishing hair masks for healthy hair.",
+        name: "Bridal & Party Hair Styling",
+        description: "Elegant updos, braids, and special occasion hair styling for weddings and events.",
         category: "women",
         priceMin: 800,
         priceMax: 2500,
-        duration: 120,
-        imageUrl: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+        duration: 90,
+        imageUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       },
-      // Kids Services (3 services)
+      {
+        name: "Professional Blowdry & Styling",
+        description: "Smooth, voluminous blowdry with heat protection and professional styling.",
+        category: "women",
+        priceMin: 250,
+        priceMax: 600,
+        duration: 45,
+        imageUrl: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+      },
+      {
+        name: "Hair Wash & Basic Styling",
+        description: "Professional hair washing, conditioning, and basic styling service.",
+        category: "women",
+        priceMin: 200,
+        priceMax: 450,
+        duration: 30,
+        imageUrl: "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+      },
+      {
+        name: "Hair Consultation & Advice",
+        description: "Expert hair analysis, styling tips, and personalized care recommendations.",
+        category: "women",
+        priceMin: 150,
+        priceMax: 300,
+        duration: 30,
+        imageUrl: "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+      },
+      // Kids Hair Services
       {
         name: "Kids Haircuts & Styling",
         description: "Fun and comfortable haircuts for children with patient, child-friendly stylists.",
@@ -210,12 +263,12 @@ export class MemStorage implements IStorage {
         imageUrl: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       },
       {
-        name: "Kids Party Makeup",
-        description: "Special occasion makeup for kids' parties, school events, and celebrations.",
+        name: "Kids Party & Special Occasion Styling",
+        description: "Special occasion hairstyles with fun braids, curls, and accessories for parties.",
         category: "kids",
-        priceMin: 300,
-        priceMax: 800,
-        duration: 60,
+        priceMin: 200,
+        priceMax: 600,
+        duration: 45,
         imageUrl: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       },
       {
@@ -225,6 +278,15 @@ export class MemStorage implements IStorage {
         priceMin: 100,
         priceMax: 300,
         duration: 20,
+        imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
+      },
+      {
+        name: "Creative Braiding & Fun Styles",
+        description: "Creative braids, ponytails, and fun hairstyles perfect for school and daily wear.",
+        category: "kids",
+        priceMin: 150,
+        priceMax: 400,
+        duration: 30,
         imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
       }
     ];
@@ -255,18 +317,10 @@ export class MemStorage implements IStorage {
     
     // Save to MongoDB if connected
     if (this.dbConnected) {
-      try {
-        const servicesCollection = getCollection('services');
-        await servicesCollection.insertOne({
-          ...service,
-          _id: toObjectId(id),
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-        console.log(`✅ Service "${service.name}" saved to MongoDB`);
-      } catch (error) {
-        console.error('❌ Error saving service to MongoDB:', error);
-      }
+      await this.saveToMongoDB('services', {
+        ...service,
+        _id: toObjectId(id)
+      });
     }
     
     return service;
@@ -290,6 +344,15 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.customers.set(id, customer);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('customers', {
+        ...customer,
+        _id: toObjectId(id)
+      });
+    }
+    
     return customer;
   }
 
@@ -317,6 +380,15 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.bookings.set(id, booking);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('bookings', {
+        ...booking,
+        _id: toObjectId(id)
+      });
+    }
+    
     return booking;
   }
 
@@ -349,6 +421,15 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.aiConversations.set(id, conversation);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('aiConversations', {
+        ...conversation,
+        _id: toObjectId(id)
+      });
+    }
+    
     return conversation;
   }
 
@@ -383,6 +464,15 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.contactMessages.set(id, contactMessage);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('contactMessages', {
+        ...contactMessage,
+        _id: toObjectId(id)
+      });
+    }
+    
     return contactMessage;
   }
 
@@ -419,6 +509,15 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
     this.users.set(id, user);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('users', {
+        ...user,
+        _id: toObjectId(id)
+      });
+    }
+    
     return user;
   }
 
@@ -435,6 +534,15 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
     this.users.set(id, user);
+    
+    // Save to MongoDB if connected
+    if (this.dbConnected) {
+      await this.saveToMongoDB('users', {
+        ...user,
+        _id: toObjectId(id)
+      });
+    }
+    
     return user;
   }
 
@@ -483,7 +591,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new HybridStorage();
 
 // Initialize admin user after storage is created
 storage.initializeAdminUser().catch(console.error);
