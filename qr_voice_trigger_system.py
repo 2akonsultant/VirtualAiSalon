@@ -23,7 +23,7 @@ TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', 'ACd8941e7d6933a9e031879bc2
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '815e90983ed99b02e52943cc14602d56')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER', '+917019035686')
 WEBHOOK_BASE_URL = os.getenv('WEBHOOK_BASE_URL', 'https://your-domain.com')
-VOICE_ASSISTANT_URL = os.getenv('VOICE_ASSISTANT_URL', 'http://localhost:7001')
+VOICE_ASSISTANT_URL = os.getenv('VOICE_ASSISTANT_URL', 'https://virtualaisalon.onrender.com/')
 
 # Initialize Twilio client
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
