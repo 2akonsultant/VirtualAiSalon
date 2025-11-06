@@ -21,10 +21,11 @@ export function generateQRData(options: {
   serviceId?: string;
   source?: string;
 }): QRData {
-  const baseUrl = window.location.origin;
+  // Use the production URL for QR codes
+  const baseUrl = "https://virtualaisalon.onrender.com";
   
   return {
-    url: `${baseUrl}/ai-chat`,
+    url: `${baseUrl}/`,
     serviceId: options.serviceId || null,
     source: options.source || "website",
     timestamp: new Date().toISOString(),
@@ -110,6 +111,7 @@ export function isValidSalonQR(qrData: QRData): boolean {
   const allowedDomains = [
     currentDomain,
     "localhost",
+    "virtualaisalon.onrender.com",
     ...(process.env.REPLIT_DOMAINS?.split(",") || [])
   ];
   
