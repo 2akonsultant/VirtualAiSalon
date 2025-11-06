@@ -340,7 +340,7 @@ export async function sendBookingEmail(booking: BookingData): Promise<boolean> {
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
-      to: '2akonsultant@gmail.com',
+      to: '2akconsultancy@gmail.com',
       subject: `💐 New Booking Confirmation | ${booking.customerName} | Goodness Glamour Salon`,
       html: `
         <!DOCTYPE html>
@@ -567,7 +567,7 @@ export async function sendBookingEmail(booking: BookingData): Promise<boolean> {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('✅ Booking confirmation email sent successfully to 2akonsultant@gmail.com');
+    console.log('✅ Booking confirmation email sent successfully to 2akconsultancy@gmail.com');
     return true;
   } catch (error) {
     console.error('❌ Error sending booking email:', error);
@@ -659,6 +659,21 @@ export async function sendCustomerBookingConfirmation(booking: BookingData): Pro
                           Your Appointment Details
                         </h3>
                         
+                        <!-- Booking ID -->
+                        <div style="background-color: #ffffff; padding: 18px 20px; border-radius: 14px; margin-bottom: 15px; border-left: 3px solid #d4b5d4; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td width="35" valign="middle">
+                                <span style="font-size: 20px; opacity: 0.7;">🆔</span>
+                              </td>
+                              <td>
+                                <p style="margin: 0 0 4px 0; color: #b8a0b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Booking ID</p>
+                                <p style="margin: 0; color: #9880a8; font-size: 18px; font-weight: 600; font-family: 'Georgia', serif;">${booking.id}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </div>
+                        
                         <!-- Date & Time -->
                         <div style="background-color: #ffffff; padding: 18px 20px; border-radius: 14px; margin-bottom: 15px; border-left: 3px solid #d4b5d4; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                           <table width="100%" cellpadding="0" cellspacing="0">
@@ -683,22 +698,24 @@ export async function sendCustomerBookingConfirmation(booking: BookingData): Pro
                               </td>
                               <td>
                                 <p style="margin: 0 0 4px 0; color: #b8a0b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Services</p>
-                                <p style="margin: 0; color: #9880a8; font-size: 16px; font-weight: 500; font-family: 'Georgia', serif;">${booking.services}</p>
+                                <div style="margin: 0;">
+                                  ${booking.services.map(service => `<div style="margin: 2px 0; color: #9880a8; font-size: 15px; font-weight: 500; font-family: 'Georgia', serif;">• ${service}</div>`).join('')}
+                                </div>
                               </td>
                             </tr>
                           </table>
                         </div>
                         
-                        <!-- Location -->
+                        <!-- Address -->
                         <div style="background-color: #ffffff; padding: 18px 20px; border-radius: 14px; margin-bottom: 15px; border-left: 3px solid #d4b5d4; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                           <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
-                              <td width="35" valign="middle">
+                              <td width="35" valign="top">
                                 <span style="font-size: 20px; opacity: 0.7;">📍</span>
                               </td>
                               <td>
-                                <p style="margin: 0 0 4px 0; color: #b8a0b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Location</p>
-                                <p style="margin: 0; color: #9880a8; font-size: 16px; font-weight: 500; font-family: 'Georgia', serif;">${booking.notes || 'No location specified'}</p>
+                                <p style="margin: 0 0 4px 0; color: #b8a0b8; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Service Address</p>
+                                <p style="margin: 0; color: #9880a8; font-size: 15px; font-weight: 400; line-height: 1.6; font-family: 'Georgia', serif;">${booking.customerAddress}</p>
                               </td>
                             </tr>
                           </table>
