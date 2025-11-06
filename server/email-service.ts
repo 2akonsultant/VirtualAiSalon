@@ -33,7 +33,7 @@ const createTransporter = () => {
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER || '2akonsultant@gmail.com',
-      pass: process.env.EMAIL_PASSWORD || '', // Gmail App Password
+      pass: process.env.EMAIL_PASSWORD || 'C@081119892ak', // Gmail App Password
     },
   });
   
