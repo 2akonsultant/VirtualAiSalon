@@ -178,18 +178,30 @@ export async function processDashboardData(timeRange: string = 'all'): Promise<D
   try {
     console.log(`📊 Processing dashboard data for timeRange: ${timeRange}`);
     
-    // Read Excel files
-    const bookingsData = await readExcelFile('data/bookings.xlsx');
+    // Get bookings from database (not Excel) to access status
+    const allBookings = await storage.getAllBookings();
+    
+    // Read Excel files for messages (bookings now come from database)
     const messagesData = await readExcelFile('data/contact-messages.xlsx');
     
-    console.log(`📈 Read ${bookingsData.length} bookings and ${messagesData.length} messages from Excel files`);
+    // Convert database bookings to Excel format for compatibility
+    const bookingsData = allBookings.map((booking: any) => ({
+      'Booking ID': booking.id,
+      'Name': 'N/A',
+      'Date': booking.appointmentDate ? new Date(booking.appointmentDate).toLocaleDateString('en-IN') : 'N/A',
+      'Time': booking.appointmentDate ? new Date(booking.appointmentDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+      'Services': 'N/A',
+      'Total Amount': booking.totalAmount || 0,
+      'Status': booking.status || 'pending',
+      'Timestamp': booking.createdAt ? new Date(booking.createdAt).toISOString() : new Date().toISOString(),
+      'Notes': booking.notes || ''
+    }));
+    
+    console.log(`📈 Found ${allBookings.length} bookings from database and ${messagesData.length} messages from Excel files`);
     
     // Get user data from storage
-    const allUsers: any[] = [];
+    const allUsers = await storage.getAllUsers();
     console.log(`👥 Found ${allUsers.length} users in storage`);
-    
-    console.log(`🔍 Sample booking data:`, bookingsData[0]);
-    console.log(`🔍 Sample message data:`, messagesData[0]);
     
     // Filter data by time range
     const filteredBookings = filterDataByDateRange(bookingsData, timeRange, 'Timestamp');
@@ -237,23 +249,58 @@ export async function processDashboardData(timeRange: string = 'all'): Promise<D
     console.log(`💰 Calculating booking statistics...`);
     let bookingStats;
     try {
-      const totalRevenue = filteredBookings.reduce((sum, booking) => {
-        const amount = parseInt(booking['Total Amount']) || 0;
+      // Filter to only confirmed bookings for revenue calculation
+      const confirmedBookings = filteredBookings.filter((booking: any) => {
+        const status = booking['Status'] || booking.status || 'pending';
+        return status === 'confirmed';
+      });
+      
+      const totalRevenue = confirmedBookings.reduce((sum, booking) => {
+        const amount = parseInt(booking['Total Amount'] || booking.totalAmount) || 0;
         return sum + amount;
       }, 0);
-      console.log(`💰 Total revenue calculated: ₹${totalRevenue}`);
+      console.log(`💰 Total revenue calculated from ${confirmedBookings.length} confirmed bookings: ₹${totalRevenue}`);
 
-      const popularServices = getPopularServices(filteredBookings);
+      // Get service names for popular services from confirmed bookings
+      // Map confirmed bookings back to original database bookings to get serviceIds
+      const confirmedBookingsFromDb = allBookings.filter((booking: any) => {
+        const status = booking.status || 'pending';
+        return status === 'confirmed';
+      });
+      
+      const allServices = await storage.getServices();
+      const confirmedBookingsWithServices = confirmedBookingsFromDb.map((booking: any) => {
+        // Get service names from serviceIds
+        const serviceIds = Array.isArray(booking.serviceIds) ? booking.serviceIds : [];
+        const serviceNames: string[] = [];
+        for (const serviceId of serviceIds) {
+          const service = allServices.find((s: any) => s.id === serviceId);
+          if (service) {
+            serviceNames.push(service.name);
+          }
+        }
+        // Fallback to Services field if serviceIds not available
+        const services = serviceNames.length > 0 
+          ? serviceNames.join(', ')
+          : (booking['Services'] || 'N/A');
+        return {
+          'Services': services,
+          'Total Amount': booking.totalAmount || 0
+        };
+      });
+      
+      const popularServices = getPopularServices(confirmedBookingsWithServices);
       console.log(`⭐ Popular services found:`, popularServices);
 
       bookingStats = {
         totalBookings: filteredBookings.length,
+        confirmedBookings: confirmedBookings.length,
         bookingsToday: filterDataByDateRange(bookingsData, 'today', 'Timestamp').length,
         bookingsThisWeek: filterDataByDateRange(bookingsData, 'week', 'Timestamp').length,
         bookingsThisMonth: filterDataByDateRange(bookingsData, 'month', 'Timestamp').length,
         totalRevenue,
-        averageBookingValue: filteredBookings.length > 0 ? totalRevenue / filteredBookings.length : 0,
-        popularServices
+        averageBookingValue: confirmedBookings.length > 0 ? totalRevenue / confirmedBookings.length : 0,
+        popularServices: getPopularServices(confirmedBookings)
       };
       console.log(`💰 Booking stats calculated successfully`);
     } catch (error) {
