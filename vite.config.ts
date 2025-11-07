@@ -50,5 +50,8 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    hmr: {
+      overlay: false, // Disable error overlay to prevent issues with Radix UI portals
+    },
   },
 });
