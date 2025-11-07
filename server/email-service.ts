@@ -359,13 +359,13 @@ export async function sendBookingEmail(booking: BookingData): Promise<boolean> {
   try {
     console.log(`📧 Starting to send admin email for booking: ${booking.id}`);
     console.log(`📧 Customer: ${booking.customerName}`);
-    console.log(`📧 Admin email: 2akconsultancy@gmail.com`);
+    console.log(`📧 Admin email: 2akonsultant@gmail.com`);
     
     const transporter = await createTransporter();
 
     const mailOptions = {
       from: process.env.EMAIL_USER || '2akonsultant@gmail.com',
-      to: '2akconsultancy@gmail.com',
+      to: '2akonsultant@gmail.com',
       subject: `💐 New Booking Confirmation | ${booking.customerName} | Goodness Glamour Salon`,
       html: `
         <!DOCTYPE html>
