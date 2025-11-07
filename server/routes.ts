@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test endpoint to check admin user
   app.get("/api/test/admin", async (req, res) => {
     try {
-      const adminUser = await storage.getUserByEmail("2akconsultant@gmail.com");
+      const adminUser = await storage.getUserByEmail("2akonsultant@gmail.com");
       if (adminUser) {
         res.json({
           exists: true,

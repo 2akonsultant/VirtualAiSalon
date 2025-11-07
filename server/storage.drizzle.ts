@@ -241,7 +241,7 @@ export class DrizzleStorage implements IStorage {
   }
 
   async initializeAdminUser(): Promise<void> {
-    const adminEmail = "2akconsultant@gmail.com";
+    const adminEmail = "2akonsultant@gmail.com";
     const adminPassword = "C@081119892ak";
     
     // Check if admin user already exists

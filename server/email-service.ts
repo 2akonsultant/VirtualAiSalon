@@ -593,7 +593,7 @@ export async function sendBookingEmail(booking: BookingData): Promise<boolean> {
 
     console.log(`📧 Attempting to send admin email...`);
     const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Booking confirmation email sent successfully to 2akconsultancy@gmail.com');
+    console.log('✅ Booking confirmation email sent successfully to 2akonsultant@gmail.com');
     console.log(`📧 Email message ID: ${result.messageId}`);
     console.log(`📧 Email response: ${JSON.stringify(result.response)}`);
     return true;

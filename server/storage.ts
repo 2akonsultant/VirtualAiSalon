@@ -60,7 +60,7 @@ export class MemStorage implements IStorage {
   }
 
   async initializeAdminUser() {
-    const adminEmail = "2akconsultant@gmail.com";
+    const adminEmail = "2akonsultant@gmail.com";
     const adminPassword = "C@081119892ak";
     
     // Check if admin user already exists
