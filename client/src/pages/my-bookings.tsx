@@ -42,7 +42,26 @@ export default function MyBookingsPage() {
     },
     enabled: !!user,
     retry: false,
+    refetchInterval: 5000, // Refetch every 5 seconds to get updates
   });
+
+  // Subscribe to realtime booking updates
+  useEffect(() => {
+    if (!user) return;
+    
+    const es = new EventSource(`/api/events`);
+    es.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data || '{}');
+        if (data?.type === 'booking_updated' || data?.type === 'booking_deleted') {
+          refetch();
+        }
+      } catch (_e) {}
+    };
+    return () => {
+      es.close();
+    };
+  }, [user, refetch]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");

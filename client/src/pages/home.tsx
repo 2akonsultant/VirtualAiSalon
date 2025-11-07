@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import AIChat from "@/components/ai-chat";
 import ServiceCard from "@/components/service-card";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Service } from "@shared/schema";
 
 export default function Home() {
   const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiInitialMessage, setAiInitialMessage] = useState("");
   const { toast } = useToast();
@@ -38,7 +39,24 @@ export default function Home() {
 
   const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
+    refetchInterval: 5000, // Refetch every 5 seconds to get updates
   });
+
+  // Subscribe to realtime service updates
+  useEffect(() => {
+    const es = new EventSource(`/api/events`);
+    es.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data || '{}');
+        if (data?.type === 'service_created' || data?.type === 'service_updated' || data?.type === 'service_deleted') {
+          queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+        }
+      } catch (_e) {}
+    };
+    return () => {
+      es.close();
+    };
+  }, [queryClient]);
 
   const featuredServices = services.slice(0, 6);
 
@@ -536,13 +554,23 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-medium text-[#2c2c2c] mb-2">Service Interest *</label>
                   <Select 
-                    value={contactForm.serviceInterest}
-                    onValueChange={(value) => setContactForm({...contactForm, serviceInterest: value})}
+                    value={contactForm.serviceInterest || undefined}
+                    onValueChange={(value) => {
+                      try {
+                        setContactForm({...contactForm, serviceInterest: value});
+                      } catch (error) {
+                        console.error("Error updating service interest:", error);
+                      }
+                    }}
                   >
                     <SelectTrigger data-testid="select-service-interest" className="bg-[#fafafa] focus:border-[#d4af37] focus:ring-[#d4af37]/40">
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent 
+                      position="popper"
+                      className="z-50"
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
                       <SelectItem value="Women's Hair Services">Women's Hair Services</SelectItem>
                       <SelectItem value="Kids Hair Services">Kids Hair Services</SelectItem>
                       <SelectItem value="Hair Spa & Treatment">Hair Spa & Treatment</SelectItem>
