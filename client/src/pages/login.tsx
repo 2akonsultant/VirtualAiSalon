@@ -21,7 +21,7 @@ export default function Login() {
   useEffect(() => {
     // If admin login, pre-fill with admin email hint
     if (isAdminLogin) {
-      setFormData(prev => ({ ...prev, email: "2akconsultant@gmail.com" }));
+      setFormData(prev => ({ ...prev, email: "2akonsultant@gmail.com" }));
     }
   }, [isAdminLogin]);
 
