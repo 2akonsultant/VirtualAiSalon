@@ -19,34 +19,6 @@ import {
   calculateAverageValue,
   getBookingTrends 
 } from "./dashboard-service";
-
-// Helper function to filter bookings by time range from database
-function filterBookingsByTimeRange(bookings: any[], timeRange: string): any[] {
-  const now = new Date();
-  let startDate: Date | null = null;
-
-  switch (timeRange) {
-    case 'today':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      break;
-    case 'week':
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case 'month':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      break;
-    case 'all':
-    default:
-      return bookings;
-  }
-
-  if (!startDate) return bookings;
-
-  return bookings.filter((booking: any) => {
-    const bookingDate = booking.createdAt ? new Date(booking.createdAt) : new Date(booking.appointmentDate);
-    return bookingDate >= startDate!;
-  });
-}
 // Google OAuth temporarily disabled to simplify deployment
 
 // Log API key for debugging (first 10 chars only for security)
@@ -133,18 +105,6 @@ function generateFallbackResponse(message: string): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize admin user on server start (works for both MemStorage and DrizzleStorage)
-  try {
-    if (typeof (storage as any).initializeAdminUser === 'function') {
-      await (storage as any).initializeAdminUser();
-      console.log("✅ Admin user initialization completed");
-    } else {
-      console.log("⚠️ initializeAdminUser method not available on storage");
-    }
-  } catch (error) {
-    console.error("❌ Error initializing admin user:", error);
-  }
-  
   // Simple in-memory SSE clients registry
   const sseClients: Set<any> = new Set();
 
@@ -159,23 +119,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Test endpoint to check admin user
-  app.get("/api/test/admin", async (req, res) => {
+  // Health check endpoint for AWS load balancers and monitoring
+  app.get("/api/health", async (req, res) => {
     try {
-      const adminUser = await storage.getUserByEmail("2akonsultant@gmail.com");
-      if (adminUser) {
-        res.json({
-          exists: true,
-          email: adminUser.email,
-          role: adminUser.role,
-          isVerified: adminUser.isVerified,
-          id: adminUser.id,
-        });
-      } else {
-        res.json({ exists: false, message: "Admin user not found" });
-      }
+      // Optional: Check database connection
+      const dbStatus = process.env.DATABASE_URL ? "connected" : "not configured";
+      
+      res.json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: dbStatus,
+        environment: process.env.NODE_ENV || "development"
+      });
     } catch (error) {
-      res.status(500).json({ error: String(error) });
+      res.status(503).json({
+        status: "error",
+        message: "Service unavailable",
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
@@ -286,9 +248,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ User created: ${email}, OTP: ${otp}`);
 
-      // Notify dashboards of new user
-      sendSseEvent({ type: "user_created", payload: { id: newUser.id, user: newUser } });
-
       res.status(201).json({
         message: "Account created! Please check your email for verification code.",
         userId: newUser.id,
@@ -375,9 +334,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const token = generateToken(verifiedUser.id, verifiedUser.email, verifiedUser.role || "customer");
 
       console.log(`✅ User verified and logged in: ${verifiedUser.email}`);
-
-      // Notify dashboards of user verification
-      sendSseEvent({ type: "user_updated", payload: { id: verifiedUser.id, user: verifiedUser } });
 
       res.json({
         message: "Email verified successfully! You're now logged in.",
@@ -471,20 +427,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Find user
       const user = await storage.getUserByEmail(email);
       
-      console.log(`🔐 Login attempt - Email: ${email}, User found: ${!!user}`);
-      
       if (!user) {
-        console.log(`❌ Login failed - User not found for email: ${email}`);
         return res.status(401).json({ 
           message: "Invalid email or password" 
         });
       }
 
-      console.log(`🔐 User found - Email: ${user.email}, Role: ${user.role}, Verified: ${user.isVerified}`);
-
       // Check if email is verified
       if (!user.isVerified) {
-        console.log(`❌ Login failed - Email not verified: ${email}`);
         return res.status(403).json({ 
           message: "Please verify your email before logging in.",
           userId: user.id,
@@ -493,12 +443,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify password
-      console.log(`🔐 Verifying password for: ${email}`);
       const isPasswordValid = await comparePassword(password, user.password);
-      console.log(`🔐 Password valid: ${isPasswordValid}`);
       
       if (!isPasswordValid) {
-        console.log(`❌ Login failed - Invalid password for email: ${email}`);
         return res.status(401).json({ 
           message: "Invalid email or password" 
         });
@@ -775,17 +722,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      console.log(`➕ Creating new service:`, serviceData);
       const newService = await storage.createService(serviceData);
-      console.log(`✅ Service created successfully:`, newService);
-      
-      // Notify clients of new service
-      sendSseEvent({ type: "service_created", payload: { service: newService } });
-      console.log(`📢 SSE event sent: service_created for service ${newService.id}`);
-
       res.status(201).json(newService);
     } catch (error) {
-      console.error("Error creating service:", error);
       res.status(500).json({ message: "Failed to create service" });
     }
   });
@@ -805,24 +744,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Service not found" });
       }
 
-      // Update service
-      console.log(`🔄 Updating service ${id} with data:`, updateData);
-      const updatedService = await storage.updateService(id, updateData);
+      // Update service - you'll need to implement updateService in storage
+      const updatedService = { ...existingService, ...updateData };
       
-      if (!updatedService) {
-        console.error(`❌ Service ${id} not found for update`);
-        return res.status(404).json({ message: "Service not found" });
-      }
-
-      console.log(`✅ Service ${id} updated successfully:`, updatedService);
-
-      // Notify clients of service update
-      sendSseEvent({ type: "service_updated", payload: { id, service: updatedService } });
-      console.log(`📢 SSE event sent: service_updated for service ${id}`);
-
+      // For now, return the updated service
+      // In real implementation, you'd call storage.updateService(id, updateData)
       res.json(updatedService);
     } catch (error) {
-      console.error("Error updating service:", error);
       res.status(500).json({ message: "Failed to update service" });
     }
   });
@@ -841,24 +769,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Service not found" });
       }
 
-      // Delete service (soft delete)
-      console.log(`🗑️ Deleting service ${id}`);
-      const deleted = await storage.deleteService(id);
-      
-      if (!deleted) {
-        console.error(`❌ Service ${id} not found for deletion`);
-        return res.status(404).json({ message: "Service not found" });
-      }
-
-      console.log(`✅ Service ${id} deleted successfully`);
-
-      // Notify clients of service deletion
-      sendSseEvent({ type: "service_deleted", payload: { id } });
-      console.log(`📢 SSE event sent: service_deleted for service ${id}`);
-
+      // For now, return success
+      // In real implementation, you'd call storage.deleteService(id)
       res.json({ message: "Service deleted successfully" });
     } catch (error) {
-      console.error("Error deleting service:", error);
       res.status(500).json({ message: "Failed to delete service" });
     }
   });
@@ -1019,87 +933,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  /**
-   * GET /api/admin/bookings
-   * Get all bookings (admin only)
-   */
-  app.get("/api/admin/bookings", requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const bookings = await storage.getAllBookings();
-      res.json(bookings);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-      res.status(500).json({ message: "Failed to fetch bookings" });
-    }
-  });
-
-  /**
-   * PUT /api/admin/bookings/:id
-   * Update a booking (admin only)
-   */
-  app.put("/api/admin/bookings/:id", requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const bookingData = req.body;
-      
-      console.log(`🔄 Updating booking ${id} with data:`, bookingData);
-      
-      // Check if booking exists
-      const existingBooking = await storage.getBooking(id);
-      if (!existingBooking) {
-        console.error(`❌ Booking ${id} not found`);
-        return res.status(404).json({ message: "Booking not found" });
-      }
-      
-      // Update booking
-      const booking = await storage.updateBooking(id, bookingData);
-      if (!booking) {
-        console.error(`❌ Failed to update booking ${id}`);
-        return res.status(404).json({ message: "Booking not found" });
-      }
-      
-      console.log(`✅ Booking ${id} updated successfully:`, booking);
-      
-      // Notify clients of booking update
-      sendSseEvent({ type: "booking_updated", payload: { id, booking } });
-      console.log(`📢 SSE event sent: booking_updated for booking ${id}`);
-      
-      res.json(booking);
-    } catch (error) {
-      console.error("Error updating booking:", error);
-      res.status(500).json({ message: "Failed to update booking" });
-    }
-  });
-
-  /**
-   * DELETE /api/admin/bookings/:id
-   * Delete a booking (admin only)
-   */
-  app.delete("/api/admin/bookings/:id", requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      console.log(`🗑️ Deleting booking ${id}`);
-      
-      const deleted = await storage.deleteBooking(id);
-      if (!deleted) {
-        console.error(`❌ Booking ${id} not found for deletion`);
-        return res.status(404).json({ message: "Booking not found" });
-      }
-      
-      console.log(`✅ Booking ${id} deleted successfully`);
-      
-      // Notify clients of booking deletion
-      sendSseEvent({ type: "booking_deleted", payload: { id } });
-      console.log(`📢 SSE event sent: booking_deleted for booking ${id}`);
-      
-      res.json({ message: "Booking deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting booking:", error);
-      res.status(500).json({ message: "Failed to delete booking" });
-    }
-  });
-
   // AI Chat endpoint
   app.post("/api/ai/chat", async (req, res) => {
     try {
@@ -1244,8 +1077,12 @@ Remember: You're helping someone feel pampered and excited about their salon exp
     try {
       const { serviceId, source } = req.query;
       
+      // Use production URL for QR codes
+      const baseUrl = process.env.PRODUCTION_URL || process.env.REPLIT_DOMAINS || 'https://virtualaisalon.onrender.com';
+      const qrUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+      
       const qrData = {
-        url: `${process.env.REPLIT_DOMAINS || 'localhost:5000'}/ai-chat`,
+        url: `${qrUrl}/`,
         serviceId: serviceId || null,
         source: source || 'website',
         timestamp: new Date().toISOString()
@@ -1334,46 +1171,18 @@ Remember: You're helping someone feel pampered and excited about their salon exp
     try {
       const timeRange = (req.query.timeRange as string) || "all";
       
-      // Get bookings from database (not Excel) to access status
-      const allBookings = await storage.getAllBookings();
+      const bookingsData = readBookingsExcel();
       const messagesData = readContactMessagesExcel();
       
-      // Filter bookings by time range and status
-      const filteredBookings = filterBookingsByTimeRange(allBookings, timeRange);
-      const confirmedBookings = filteredBookings.filter((b: any) => b.status === 'confirmed');
+      const filteredBookings = filterByTimeRange(bookingsData, timeRange);
       const filteredMessages = filterByTimeRange(messagesData, timeRange);
-      
-      // Calculate revenue only from confirmed bookings
-      const totalRevenue = confirmedBookings.reduce((sum: number, booking: any) => {
-        return sum + (booking.totalAmount || 0);
-      }, 0);
-      
-      // Get service names for popular services calculation
-      const allServices = await storage.getServices();
-      const confirmedBookingsWithServices = await Promise.all(
-        confirmedBookings.map(async (booking: any) => {
-          const serviceIds = Array.isArray(booking.serviceIds) ? booking.serviceIds : [];
-          const serviceNames: string[] = [];
-          for (const serviceId of serviceIds) {
-            const service = allServices.find((s: any) => s.id === serviceId);
-            if (service) {
-              serviceNames.push(service.name);
-            }
-          }
-          return {
-            'Services': serviceNames.join(', '),
-            'Total Amount': booking.totalAmount || 0
-          };
-        })
-      );
       
       const stats = {
         totalBookings: filteredBookings.length,
-        confirmedBookings: confirmedBookings.length,
         totalMessages: filteredMessages.length,
-        totalRevenue: totalRevenue,
-        popularServices: getPopularServices(confirmedBookingsWithServices),
-        averageBookingValue: confirmedBookings.length > 0 ? totalRevenue / confirmedBookings.length : 0,
+        totalRevenue: calculateTotalRevenue(filteredBookings),
+        popularServices: getPopularServices(filteredBookings),
+        averageBookingValue: calculateAverageValue(filteredBookings),
       };
       
       res.json(stats);
@@ -1386,27 +1195,11 @@ Remember: You're helping someone feel pampered and excited about their salon exp
   app.get("/api/dashboard/bookings", async (req, res) => {
     try {
       const timeRange = (req.query.timeRange as string) || "all";
+      const bookingsData = readBookingsExcel();
+      const filtered = filterByTimeRange(bookingsData, timeRange);
+      const trends = getBookingTrends(filtered);
       
-      // Get bookings from database to access status
-      const allBookings = await storage.getAllBookings();
-      const filtered = filterBookingsByTimeRange(allBookings, timeRange);
-      
-      // Convert to Excel format for compatibility with existing functions
-      const bookingsData = filtered.map((booking: any) => ({
-        'Booking ID': booking.id,
-        'Name': 'N/A', // Will be populated from customer if needed
-        'Date': booking.appointmentDate ? new Date(booking.appointmentDate).toLocaleDateString('en-IN') : 'N/A',
-        'Time': booking.appointmentDate ? new Date(booking.appointmentDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-        'Services': 'N/A', // Will be populated from serviceIds if needed
-        'Total Amount': booking.totalAmount || 0,
-        'Status': booking.status || 'pending',
-        'Timestamp': booking.createdAt ? new Date(booking.createdAt).toISOString() : new Date().toISOString(),
-        'Notes': booking.notes || ''
-      }));
-      
-      const trends = getBookingTrends(bookingsData);
-      
-      res.json({ bookings: bookingsData, trends });
+      res.json({ bookings: filtered, trends });
     } catch (error) {
       console.error("Dashboard bookings error:", error);
       res.status(500).json({ error: "Failed to fetch bookings data" });
