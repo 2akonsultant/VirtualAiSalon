@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import ServiceCard from "@/components/service-card";
 import AIChat from "@/components/ai-chat";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Service } from "@shared/schema";
 
 export default function Services() {
   const params = useParams();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(params.category || "all");
   const [sortBy, setSortBy] = useState("name");
@@ -21,7 +22,25 @@ export default function Services() {
 
   const { data: allServices = [], isLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
+    refetchInterval: 5000, // Refetch every 5 seconds to get updates
   });
+
+  // Subscribe to realtime service updates
+  useEffect(() => {
+    const es = new EventSource(`/api/events`);
+    es.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data || '{}');
+        if (data?.type === 'service_created' || data?.type === 'service_updated' || data?.type === 'service_deleted') {
+          console.log('🔄 Service update detected:', data.type);
+          queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+        }
+      } catch (_e) {}
+    };
+    return () => {
+      es.close();
+    };
+  }, [queryClient]);
 
   // Filter and sort services
   const filteredServices = allServices
