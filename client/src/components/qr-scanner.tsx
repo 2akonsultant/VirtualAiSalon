@@ -64,7 +64,7 @@ export default function QRScanner({ isOpen, onClose, onScanSuccess }: QRScannerP
     setTimeout(() => {
       setIsScanning(false);
       const mockQRData = JSON.stringify({
-        url: "https://virtualaisalon.onrender.com/",
+        url: window.location.origin + "/ai-chat",
         serviceId: null,
         source: "website",
         timestamp: new Date().toISOString()
