@@ -56,8 +56,6 @@ export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState("all");
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [isEditBookingOpen, setIsEditBookingOpen] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<any | null>(null);
   const queryClient = useQueryClient();
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -127,22 +125,6 @@ export default function AdminDashboard() {
     refetchInterval: 5000,
     enabled: !!user,
   });
-
-  // Fetch all bookings for admin management
-  const { data: allBookings, refetch: refetchAllBookings } = useQuery({
-    queryKey: ["/api/admin/bookings"],
-    queryFn: async () => {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("/api/admin/bookings", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch bookings');
-      return response.json();
-    },
-    enabled: !!user,
-  });
   
   // Fetch contact messages (all messages) for the selected time range
   const { data: messagesData, refetch: refetchMessages } = useQuery({
@@ -190,30 +172,6 @@ export default function AdminDashboard() {
           refetchAnalytics();
           refetchMessages();
         }
-        // Handle service updates
-        if (data?.type === 'service_created' || data?.type === 'service_updated' || data?.type === 'service_deleted') {
-          refetchServices();
-          queryClient.invalidateQueries({ queryKey: ["/api/services"] });
-        }
-        // Handle booking updates
-        if (data?.type === 'booking_updated' || data?.type === 'booking_deleted' || data?.type === 'booking_created') {
-          refetchAllBookings();
-          refetchBookings();
-          refetchStats();
-          refetchAnalytics();
-          queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/bookings"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/analytics"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/user/bookings"] });
-        }
-        // Handle user updates
-        if (data?.type === 'user_created' || data?.type === 'user_updated') {
-          refetchStats();
-          refetchAnalytics();
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/analytics"] });
-        }
       } catch (_e) {}
     };
     setEventSource(es);
@@ -221,7 +179,7 @@ export default function AdminDashboard() {
       es.close();
       setEventSource(null);
     };
-  }, [user, refetchStats, refetchBookings, refetchAnalytics, refetchServices, queryClient]);
+  }, [user, refetchStats, refetchBookings, refetchAnalytics]);
 
   // Auto-refresh analytics when time range changes
   useEffect(() => {
@@ -265,9 +223,6 @@ export default function AdminDashboard() {
         ? `/api/admin/services/${editingService.id}` 
         : "/api/admin/services";
       
-      console.log(`🔄 ${editingService ? 'Updating' : 'Creating'} service:`, serviceData);
-      console.log(`📡 URL: ${url}, Method: ${editingService ? 'PUT' : 'POST'}`);
-      
       const response = await fetch(url, {
         method: editingService ? "PUT" : "POST",
         headers: {
@@ -278,19 +233,13 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`❌ Failed to ${editingService ? 'update' : 'create'} service:`, errorData);
-        throw new Error(errorData.message || "Failed to save service");
+        throw new Error("Failed to save service");
       }
 
-      const result = await response.json();
-      console.log(`✅ Service ${editingService ? 'updated' : 'created'} successfully:`, result);
-      return result;
+      return response.json();
     },
     onSuccess: () => {
-      console.log(`🔄 Invalidating query caches...`);
       queryClient.invalidateQueries({ queryKey: ["/api/admin/services"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       setIsAddServiceOpen(false);
       setEditingService(null);
     },
@@ -313,73 +262,6 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/services"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/services"] });
-    },
-  });
-
-  // Update booking mutation
-  const updateBookingMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const token = localStorage.getItem("authToken");
-      
-      console.log(`🔄 Updating booking ${id} with data:`, data);
-      
-      const response = await fetch(`/api/admin/bookings/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`❌ Failed to update booking:`, errorData);
-        throw new Error(errorData.message || "Failed to update booking");
-      }
-
-      const result = await response.json();
-      console.log(`✅ Booking updated successfully:`, result);
-      return result;
-    },
-    onSuccess: () => {
-      console.log(`🔄 Invalidating booking query caches...`);
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/bookings"] });
-      setIsEditBookingOpen(false);
-      setEditingBooking(null);
-    },
-  });
-
-  // Delete booking mutation
-  const deleteBookingMutation = useMutation({
-    mutationFn: async (bookingId: string) => {
-      const token = localStorage.getItem("authToken");
-      
-      console.log(`🗑️ Deleting booking ${bookingId}`);
-      
-      const response = await fetch(`/api/admin/bookings/${bookingId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`❌ Failed to delete booking:`, errorData);
-        throw new Error(errorData.message || "Failed to delete booking");
-      }
-      
-      console.log(`✅ Booking deleted successfully`);
-    },
-    onSuccess: () => {
-      console.log(`🔄 Invalidating booking query caches...`);
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/bookings"] });
     },
   });
 
@@ -397,23 +279,6 @@ export default function AdminDashboard() {
   const handleDeleteService = (serviceId: string) => {
     if (confirm("Are you sure you want to delete this service?")) {
       deleteServiceMutation.mutate(serviceId);
-    }
-  };
-
-  const handleEditBooking = (booking: any) => {
-    setEditingBooking(booking);
-    setIsEditBookingOpen(true);
-  };
-
-  const handleSaveBooking = (bookingData: any) => {
-    if (editingBooking) {
-      updateBookingMutation.mutate({ id: editingBooking.id, data: bookingData });
-    }
-  };
-
-  const handleDeleteBooking = (bookingId: string) => {
-    if (confirm("Are you sure you want to delete this booking?")) {
-      deleteBookingMutation.mutate(bookingId);
     }
   };
 
@@ -814,143 +679,35 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* All Bookings Management */}
+        {/* Recent Bookings */}
         <Card className="bg-white/95 backdrop-blur-sm border border-gray-200/50 shadow-xl shadow-gray-200/20">
           <CardHeader>
             <CardTitle className="text-amber-700 font-serif flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              All Bookings Management
+              Recent Bookings
             </CardTitle>
-            <CardDescription className="text-gray-600">
-              View, edit, and delete all bookings
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {allBookings && allBookings.length > 0 ? (
-                allBookings
-                  .filter((booking: any) => booking.status === 'confirmed') // Only show confirmed bookings
-                  .map((booking: any) => {
-                  const bookingDate = booking.appointmentDate 
-                    ? new Date(booking.appointmentDate).toLocaleDateString('en-IN', { 
-                        weekday: 'short', 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })
-                    : 'N/A';
-                  
-                  const bookingTime = booking.appointmentDate
-                    ? new Date(booking.appointmentDate).toLocaleTimeString('en-IN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                      })
-                    : 'N/A';
-                  
-                  // Get service names from serviceIds
-                  const serviceIds = Array.isArray(booking.serviceIds) ? booking.serviceIds : [];
-                  const bookedServices = serviceIds
-                    .map((serviceId: string) => {
-                      const service = services?.find((s: Service) => s.id === serviceId);
-                      return service ? service.name : null;
-                    })
-                    .filter((name: string | null) => name !== null);
-                  
-                  return (
-                    <div key={booking.id} className="p-4 bg-gradient-to-r from-amber-50/60 to-white/80 rounded-lg border border-amber-200/30 hover:shadow-md transition-all duration-200">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <p className="font-medium text-gray-900">Booking ID: {booking.id.substring(0, 8)}...</p>
-                            <Badge className={booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}>
-                              {booking.status || 'pending'}
-                            </Badge>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Date:</span> {bookingDate} at {bookingTime}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              <span className="font-medium">Amount:</span> ₹{booking.totalAmount || 0}
-                            </p>
-                            {bookedServices.length > 0 ? (
-                              <div className="mt-2">
-                                <p className="text-xs font-medium text-gray-700 mb-1">Booked Services:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {bookedServices.map((serviceName: string, index: number) => (
-                                    <Badge 
-                                      key={index} 
-                                      variant="outline" 
-                                      className="text-xs bg-amber-50 text-amber-800 border-amber-300"
-                                    >
-                                      {serviceName}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {serviceIds.length > 0 ? `${serviceIds.length} service(s)` : 'No services'}
-                              </p>
-                            )}
-                            {booking.notes && (
-                              <p className="text-xs text-gray-500 mt-2">
-                                <span className="font-medium">Notes:</span> {booking.notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditBooking(booking)}
-                            className="text-amber-800 border-amber-800 hover:bg-amber-800 hover:text-black"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteBooking(booking.id)}
-                            className="text-red-400 border-red-400 hover:bg-red-400 hover:text-white"
-                          >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
+              {bookingsData?.bookings && bookingsData.bookings.length > 0 ? (
+                bookingsData.bookings.slice(0, 5).map((booking: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50/60 to-white/80 rounded-lg border border-amber-200/30 hover:shadow-md transition-all duration-200">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{booking.Name}</p>
+                      <p className="text-sm text-gray-600">{booking.Services}</p>
                     </div>
-                  );
-                })
+                    <div className="text-right">
+                      <p className="font-semibold text-amber-700">₹{booking['Total Amount']}</p>
+                      <p className="text-xs text-gray-500">{booking.Date}</p>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <p className="text-center text-gray-500 py-8">No bookings yet</p>
               )}
             </div>
           </CardContent>
         </Card>
-
-        {/* Booking Edit Dialog */}
-        <Dialog open={isEditBookingOpen} onOpenChange={setIsEditBookingOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-amber-700">Edit Booking</DialogTitle>
-            </DialogHeader>
-            {editingBooking && (
-              <BookingEditForm
-                booking={editingBooking}
-                onSave={handleSaveBooking}
-                onCancel={() => {
-                  setIsEditBookingOpen(false);
-                  setEditingBooking(null);
-                }}
-                isLoading={updateBookingMutation.isPending}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
 
         {/* All Messages */}
         <Card className="bg-white/95 backdrop-blur-sm border border-gray-200/50 shadow-xl shadow-gray-200/20">
@@ -1026,133 +783,6 @@ export default function AdminDashboard() {
         </div>
       </section>
     </div>
-  );
-}
-
-// Booking Edit Form Component
-function BookingEditForm({
-  booking,
-  onSave,
-  onCancel,
-  isLoading
-}: {
-  booking: any;
-  onSave: (data: any) => void;
-  onCancel: () => void;
-  isLoading: boolean;
-}) {
-  const [formData, setFormData] = useState({
-    status: booking.status || "pending",
-    appointmentDate: booking.appointmentDate 
-      ? new Date(booking.appointmentDate).toISOString().split('T')[0]
-      : "",
-    appointmentTime: booking.appointmentDate
-      ? new Date(booking.appointmentDate).toTimeString().slice(0, 5)
-      : "",
-    totalAmount: booking.totalAmount || 0,
-    notes: booking.notes || "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Combine date and time into appointmentDate
-    const appointmentDateTime = formData.appointmentDate && formData.appointmentTime
-      ? new Date(`${formData.appointmentDate}T${formData.appointmentTime}`).toISOString()
-      : booking.appointmentDate;
-
-    onSave({
-      status: formData.status,
-      appointmentDate: appointmentDateTime,
-      totalAmount: formData.totalAmount,
-      notes: formData.notes,
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="status" className="text-amber-700">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-            <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-600">
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="totalAmount" className="text-amber-700">Total Amount (₹)</Label>
-          <Input
-            id="totalAmount"
-            type="number"
-            value={formData.totalAmount}
-            onChange={(e) => setFormData({ ...formData, totalAmount: parseInt(e.target.value) || 0 })}
-            className="bg-gray-800 border-gray-600 text-white"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="appointmentDate" className="text-amber-700">Appointment Date</Label>
-          <Input
-            id="appointmentDate"
-            type="date"
-            value={formData.appointmentDate}
-            onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
-            className="bg-gray-800 border-gray-600 text-white"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="appointmentTime" className="text-amber-700">Appointment Time</Label>
-          <Input
-            id="appointmentTime"
-            type="time"
-            value={formData.appointmentTime}
-            onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
-            className="bg-gray-800 border-gray-600 text-white"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="notes" className="text-amber-700">Notes</Label>
-        <Textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="bg-gray-800 border-gray-600 text-white"
-          rows={3}
-        />
-      </div>
-
-      <div className="flex justify-end gap-2 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          className="border-gray-600 text-gray-300 hover:bg-gray-700"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          className="bg-amber-700 hover:bg-amber-800 text-white"
-          disabled={isLoading}
-        >
-          {isLoading ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-    </form>
   );
 }
 

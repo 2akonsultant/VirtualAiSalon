@@ -9,13 +9,12 @@ import Booking from "@/pages/booking";
 import ScanQR from "@/pages/scan-qr";
 import AboutService from "@/pages/about-service";
 import Dashboard from "@/pages/dashboard";
-import Login from "@/pages/login";
-import Signup from "@/pages/signup";
-import VerifyOTP from "@/pages/verify-otp";
+// Auth pages removed
 import AdminDashboard from "@/pages/admin-dashboard";
 import MyBookings from "@/pages/my-bookings";
 import NotFound from "@/pages/not-found";
 import Navigation from "@/components/navigation";
+// AuthGuard removed
 import WhatsAppChat from "@/components/whatsapp-chat";
 
 function Router() {
@@ -62,18 +61,6 @@ function Router() {
         <Route path="/ai-chat">
           <Navigation />
           <Home />
-        </Route>
-        <Route path="/login">
-          <Navigation />
-          <Login />
-        </Route>
-        <Route path="/signup">
-          <Navigation />
-          <Signup />
-        </Route>
-        <Route path="/verify-otp">
-          <Navigation />
-          <VerifyOTP />
         </Route>
         
         {/* 404 page */}

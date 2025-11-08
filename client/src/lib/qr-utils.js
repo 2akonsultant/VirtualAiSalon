@@ -9,9 +9,10 @@ export const qrDataSchema = z.object({
  * Generates QR code data for salon services
  */
 export function generateQRData(options) {
-    const baseUrl = window.location.origin;
+    // Use the production URL for QR codes
+    const baseUrl = "https://virtualaisalon.onrender.com";
     return {
-        url: `${baseUrl}/ai-chat`,
+        url: `${baseUrl}/`,
         serviceId: options.serviceId || null,
         source: options.source || "website",
         timestamp: new Date().toISOString(),
@@ -87,6 +88,7 @@ export function isValidSalonQR(qrData) {
     const allowedDomains = [
         currentDomain,
         "localhost",
+        "virtualaisalon.onrender.com",
         ...(process.env.REPLIT_DOMAINS?.split(",") || [])
     ];
     return allowedDomains.includes(qrDomain);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, CheckCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,24 +47,7 @@ export default function Booking() {
 
   const { data: services = [], isLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
-    refetchInterval: 5000, // Refetch every 5 seconds to get updates
   });
-
-  // Subscribe to realtime service updates
-  useEffect(() => {
-    const es = new EventSource(`/api/events`);
-    es.onmessage = (evt) => {
-      try {
-        const data = JSON.parse(evt.data || '{}');
-        if (data?.type === 'service_created' || data?.type === 'service_updated' || data?.type === 'service_deleted') {
-          queryClient.invalidateQueries({ queryKey: ["/api/services"] });
-        }
-      } catch (_e) {}
-    };
-    return () => {
-      es.close();
-    };
-  }, [queryClient]);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
