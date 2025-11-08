@@ -45,6 +45,25 @@ export class DrizzleStorage implements IStorage {
     return rows[0];
   }
 
+  async updateService(id: string, updateData: Partial<InsertService>): Promise<Service | undefined> {
+    const rows = await db
+      .update(services)
+      .set(updateData)
+      .where(eq(services.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deleteService(id: string): Promise<boolean> {
+    // Soft delete by setting isActive to false
+    const rows = await db
+      .update(services)
+      .set({ isActive: false })
+      .where(eq(services.id, id))
+      .returning();
+    return rows.length > 0;
+  }
+
   // Customers
   async getCustomer(id: string): Promise<Customer | undefined> {
     const rows = await db.select().from(customers).where(eq(customers.id, id)).limit(1);
@@ -91,6 +110,27 @@ export class DrizzleStorage implements IStorage {
       .where(eq(bookings.id, id))
       .returning();
     return rows[0];
+  }
+
+  async getAllBookings(): Promise<Booking[]> {
+    return db.select().from(bookings).orderBy(desc(bookings.createdAt));
+  }
+
+  async updateBooking(id: string, bookingData: Partial<InsertBooking>): Promise<Booking | undefined> {
+    const rows = await db
+      .update(bookings)
+      .set(bookingData)
+      .where(eq(bookings.id, id))
+      .returning();
+    return rows[0];
+  }
+
+  async deleteBooking(id: string): Promise<boolean> {
+    const rows = await db
+      .delete(bookings)
+      .where(eq(bookings.id, id))
+      .returning();
+    return rows.length > 0;
   }
 
   // AI Conversations
@@ -169,6 +209,10 @@ export class DrizzleStorage implements IStorage {
     return rows[0];
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
   async createUserWithOTP(userData: InsertUser & { otp: string; otpExpiry: Date }): Promise<User> {
     const rows = await db.insert(users).values(userData).returning();
     return rows[0];
@@ -194,6 +238,70 @@ export class DrizzleStorage implements IStorage {
       .update(users)
       .set({ otp, otpExpiry, otpAttempts: 0 })
       .where(eq(users.id, userId));
+  }
+
+  async initializeAdminUser(): Promise<void> {
+    const adminEmail = "2akonsultant@gmail.com";
+    const adminPassword = "C@081119892ak";
+    
+    // Check if admin user already exists
+    const existingAdmin = await this.getUserByEmail(adminEmail);
+    if (existingAdmin) {
+      console.log(`✅ Admin user already exists: ${adminEmail}`);
+      console.log(`🔐 Admin user details - ID: ${existingAdmin.id}, Role: ${existingAdmin.role}, Verified: ${existingAdmin.isVerified}`);
+      
+      // Update password if needed (in case it was changed)
+      const { hashPassword, comparePassword } = await import("./auth-service");
+      const passwordMatch = await comparePassword(adminPassword, existingAdmin.password);
+      if (!passwordMatch) {
+        console.log(`🔄 Updating admin password...`);
+        const hashedPassword = await hashPassword(adminPassword);
+        await db
+          .update(users)
+          .set({ 
+            password: hashedPassword, 
+            role: "admin", 
+            isVerified: true,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, existingAdmin.id));
+        console.log(`✅ Admin password updated`);
+      }
+      return;
+    }
+
+    // Hash the admin password
+    const { hashPassword } = await import("./auth-service");
+    const hashedPassword = await hashPassword(adminPassword);
+    console.log(`🔐 Admin password hashed successfully`);
+
+    // Create default admin user
+    const adminUser = {
+      id: "admin-user-001",
+      email: adminEmail,
+      password: hashedPassword,
+      name: "Admin User",
+      phone: "9036626642",
+      role: "admin",
+      isVerified: true,
+      otp: null as any,
+      otpExpiry: null as any,
+      otpAttempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    try {
+      await db.insert(users).values(adminUser);
+    } catch (error: any) {
+      // User might already exist, ignore duplicate key error
+      if (error?.code !== '23505' && !error?.message?.includes('duplicate')) {
+        throw error;
+      }
+      console.log(`ℹ️ Admin user already exists in database`);
+    }
+    console.log(`✅ Admin user created: ${adminEmail}`);
+    console.log(`🔐 Admin user details - ID: ${adminUser.id}, Role: ${adminUser.role}, Verified: ${adminUser.isVerified}`);
   }
 }
 

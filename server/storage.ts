@@ -7,6 +7,8 @@ export interface IStorage {
   getServicesByCategory(category: string): Promise<Service[]>;
   getService(id: string): Promise<Service | undefined>;
   createService(service: InsertService): Promise<Service>;
+  updateService(id: string, service: Partial<InsertService>): Promise<Service | undefined>;
+  deleteService(id: string): Promise<boolean>;
   
   // Customers
   getCustomer(id: string): Promise<Customer | undefined>;
@@ -17,8 +19,11 @@ export interface IStorage {
   getBooking(id: string): Promise<Booking | undefined>;
   getBookingsByCustomer(customerId: string): Promise<Booking[]>;
   getBookingsByUser(userId: string): Promise<Booking[]>;
+  getAllBookings(): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBookingStatus(id: string, status: string): Promise<Booking | undefined>;
+  updateBooking(id: string, booking: Partial<InsertBooking>): Promise<Booking | undefined>;
+  deleteBooking(id: string): Promise<boolean>;
   
   // AI Conversations
   getConversation(id: string): Promise<AiConversation | undefined>;
@@ -35,6 +40,7 @@ export interface IStorage {
   // Users (Authentication)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUserWithOTP(userData: InsertUser & { otp: string; otpExpiry: Date }): Promise<User>;
   verifyUserOTP(userId: string): Promise<User | undefined>;
   incrementOTPAttempts(userId: string): Promise<void>;
@@ -54,17 +60,41 @@ export class MemStorage implements IStorage {
   }
 
   async initializeAdminUser() {
+    const adminEmail = "2akonsultant@gmail.com";
+    const adminPassword = "C@081119892ak";
+    
     // Check if admin user already exists
-    const existingAdmin = await this.getUserByEmail("admin@goodnessglamour.com");
+    const existingAdmin = await this.getUserByEmail(adminEmail);
     if (existingAdmin) {
+      console.log(`✅ Admin user already exists: ${adminEmail}`);
+      console.log(`🔐 Admin user details - ID: ${existingAdmin.id}, Role: ${existingAdmin.role}, Verified: ${existingAdmin.isVerified}`);
+      
+      // Update password if needed (in case it was changed)
+      const { hashPassword, comparePassword } = await import("./auth-service");
+      const passwordMatch = await comparePassword(adminPassword, existingAdmin.password);
+      if (!passwordMatch) {
+        console.log(`🔄 Updating admin password...`);
+        const hashedPassword = await hashPassword(adminPassword);
+        existingAdmin.password = hashedPassword;
+        existingAdmin.role = "admin";
+        existingAdmin.isVerified = true;
+        existingAdmin.updatedAt = new Date();
+        this.users.set(existingAdmin.id, existingAdmin);
+        console.log(`✅ Admin password updated`);
+      }
       return;
     }
+
+    // Hash the admin password
+    const { hashPassword } = await import("./auth-service");
+    const hashedPassword = await hashPassword(adminPassword);
+    console.log(`🔐 Admin password hashed successfully`);
 
     // Create default admin user
     const adminUser: User = {
       id: "admin-user-001",
-      email: "admin@goodnessglamour.com",
-      password: "$2b$10$tB9vRCweJPklU7eRtyoDTeLEs1cRu/bdkpd.VcqyfyIb5p5rUlDfG", // "admin123" hashed
+      email: adminEmail,
+      password: hashedPassword,
       name: "Admin User",
       phone: "9036626642",
       role: "admin",
@@ -77,7 +107,8 @@ export class MemStorage implements IStorage {
     };
 
     this.users.set(adminUser.id, adminUser);
-    console.log("✅ Default admin user created: admin@goodnessglamour.com / admin123");
+    console.log(`✅ Admin user created: ${adminEmail}`);
+    console.log(`🔐 Admin user details - ID: ${adminUser.id}, Role: ${adminUser.role}, Verified: ${adminUser.isVerified}`);
   }
 
   private initializeServices() {
@@ -211,6 +242,29 @@ export class MemStorage implements IStorage {
     return service;
   }
 
+  async updateService(id: string, updateData: Partial<InsertService>): Promise<Service | undefined> {
+    const existingService = this.services.get(id);
+    if (!existingService) {
+      console.error(`❌ Service ${id} not found in storage`);
+      return undefined;
+    }
+    const updatedService: Service = { ...existingService, ...updateData };
+    this.services.set(id, updatedService);
+    console.log(`✅ Service ${id} updated in storage. New data:`, updatedService);
+    return updatedService;
+  }
+
+  async deleteService(id: string): Promise<boolean> {
+    // Soft delete by setting isActive to false
+    const service = this.services.get(id);
+    if (service) {
+      service.isActive = false;
+      this.services.set(id, service);
+      return true;
+    }
+    return false;
+  }
+
   // Customers
   async getCustomer(id: string): Promise<Customer | undefined> {
     return this.customers.get(id);
@@ -261,6 +315,10 @@ export class MemStorage implements IStorage {
     return booking;
   }
 
+  async getAllBookings(): Promise<Booking[]> {
+    return Array.from(this.bookings.values());
+  }
+
   async updateBookingStatus(id: string, status: string): Promise<Booking | undefined> {
     const booking = this.bookings.get(id);
     if (booking) {
@@ -269,6 +327,35 @@ export class MemStorage implements IStorage {
       return booking;
     }
     return undefined;
+  }
+
+  async updateBooking(id: string, bookingData: Partial<InsertBooking>): Promise<Booking | undefined> {
+    const booking = this.bookings.get(id);
+    if (!booking) {
+      console.error(`❌ Booking ${id} not found in storage`);
+      return undefined;
+    }
+    
+    // Handle date conversion if appointmentDate is provided
+    let updatedData = { ...bookingData };
+    if (bookingData.appointmentDate) {
+      updatedData.appointmentDate = bookingData.appointmentDate instanceof Date 
+        ? bookingData.appointmentDate 
+        : new Date(bookingData.appointmentDate);
+    }
+    
+    const updatedBooking: Booking = { 
+      ...booking, 
+      ...updatedData,
+      updatedAt: new Date()
+    };
+    this.bookings.set(id, updatedBooking);
+    console.log(`✅ Booking ${id} updated in storage. New data:`, updatedBooking);
+    return updatedBooking;
+  }
+
+  async deleteBooking(id: string): Promise<boolean> {
+    return this.bookings.delete(id);
   }
 
   // AI Conversations
@@ -345,6 +432,10 @@ export class MemStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
   async createUserWithOTP(userData: InsertUser & { otp: string; otpExpiry: Date }): Promise<User> {
