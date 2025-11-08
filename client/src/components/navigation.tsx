@@ -1,30 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Calendar, User, Settings, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Menu, X, Calendar, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { getCurrentUser, getAuthToken, logout as authLogout } from "@/utils/auth";
 
 export default function Navigation() {
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<{ role?: string; name?: string; email?: string } | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    const currentToken = getAuthToken();
-    setUser(currentUser);
-    setToken(currentToken);
-  }, [location]);
-
-  const handleLogout = () => {
-    authLogout();
-    setUser(null);
-    setToken(null);
-    setLocation("/");
-  };
+  // Public site: hide auth; provide default user null
+  const token = null as unknown as string | null;
+  const user = null as unknown as { role?: string; name?: string; email?: string } | null;
 
   // Role-based navigation items
   const navItems = user?.role === "admin" 
@@ -75,51 +62,7 @@ export default function Navigation() {
               </Link>
             ))}
             
-            {/* Auth UI */}
-            {token && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center text-[#faf8f3] hover:text-[#d4af37]">
-                    <User className="h-5 w-5 mr-2" />
-                    {user.name || user.email}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setLocation("/my-bookings")}>
-                    <Calendar className="h-4 w-4 mr-2" />
-                    My Bookings
-                  </DropdownMenuItem>
-                  {user.role === "admin" && (
-                    <DropdownMenuItem onClick={() => setLocation("/admin-dashboard")}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Admin Dashboard
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => setLocation("/login")}
-                  className="bg-[#c9a869] text-[#2c1810] hover:bg-[#d4af37]"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
-                <Button
-                  onClick={() => setLocation("/signup")}
-                  className="bg-[#c9a869] text-[#2c1810] hover:bg-[#d4af37]"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Sign Up
-                </Button>
-              </div>
-            )}
+            {/* Auth UI removed for public site */}
             
             <Link href="/booking" data-testid="button-book-now">
               <Button className="flex items-center text-lg px-6 py-3 bg-[#c9a869] text-[#2c1810] hover:bg-[#d4af37]">
@@ -158,59 +101,7 @@ export default function Navigation() {
                     </Link>
                   ))}
                   
-                  {/* Auth UI (mobile) */}
-                  {token && user ? (
-                    <>
-                      <Link href="/my-bookings" onClick={() => setIsOpen(false)}>
-                        <Button variant="ghost" className="w-full justify-start">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          My Bookings
-                        </Button>
-                      </Link>
-                      {user.role === "admin" && (
-                        <Link href="/admin-dashboard" onClick={() => setIsOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Admin Dashboard
-                          </Button>
-                        </Link>
-                      )}
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          handleLogout();
-                          setIsOpen(false);
-                        }}
-                        className="w-full justify-start"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Logout
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        onClick={() => {
-                          setLocation("/login");
-                          setIsOpen(false);
-                        }}
-                        className="w-full btn-primary"
-                      >
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Login
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setLocation("/signup");
-                          setIsOpen(false);
-                        }}
-                        className="w-full btn-primary"
-                      >
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Sign Up
-                      </Button>
-                    </div>
-                  )}
+                  {/* Auth UI removed for public site (mobile) */}
                   
                   <Link href="/booking" onClick={() => setIsOpen(false)} data-testid="button-mobile-book">
                     <Button className="btn-primary w-full flex items-center justify-center text-lg py-3">
